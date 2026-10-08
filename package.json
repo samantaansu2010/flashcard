@@ -1,6 +1,6 @@
 {
-  "name": "flashcard-book",
-  "version": "1.4.2",
+  "name": "flashcard",
+  "version": "0.1.1",
   "description": "Obsidian plugin: automatic flashcards, spaced repetition, active recall and retention analytics. Local and free.",
   "main": "main.js",
   "scripts": {
@@ -20,3 +20,4 @@
     "@codemirror/view": "^6.26.0"
   }
 }
+
