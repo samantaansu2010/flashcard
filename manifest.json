@@ -1,0 +1,9 @@
+{
+  "id": "flashcard-book",
+  "name": "FlashCard Book",
+  "version": "1.4.2",
+  "minAppVersion": "1.4.0",
+  "description": "Obsidian-native flashcards: create cards from selections, headings and notes (or let rules find them), custom separators, decks, spaced repetition, analytics and Anki import/export. Fully local.",
+  "author": "FlashCard Book contributors",
+  "isDesktopOnly": false
+}

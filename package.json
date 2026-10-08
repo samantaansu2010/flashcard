@@ -1,0 +1,22 @@
+{
+  "name": "flashcard-book",
+  "version": "1.4.2",
+  "description": "Obsidian plugin: automatic flashcards, spaced repetition, active recall and retention analytics. Local and free.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "test": "node scripts/test.mjs && node scripts/test-zstd.mjs && node scripts/test-integration.mjs && node scripts/test-tz.mjs"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "builtin-modules": "^3.3.0",
+    "esbuild": "^0.21.0",
+    "obsidian": "latest",
+    "tslib": "^2.6.2",
+    "typescript": "^5.4.0",
+    "@codemirror/state": "^6.4.0",
+    "@codemirror/view": "^6.26.0"
+  }
+}
