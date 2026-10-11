@@ -102,7 +102,7 @@ export class Actions {
     if (!c) { new Notice("FlashCard Book: put the cursor inside a heading section first."); return; }
     const title = stripInline(c.sec.heading.text);
     const lead = sectionLead(c.lines, c.sec);
-    const first = lead.split(/(?<=[.!?])\s+/)[0] ?? lead;
+    const first = lead.match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim() ?? lead;
     const q = /\?$/.test(title) ? title : `What is ${this.p.settings.lowercaseTerms && title.split(/\s+/).length < 5 ? title.toLowerCase() : title}?`;
     new CreateCardModal(this.app, this.p, {
       front: q, back: first.trim() || lead, selected: lead || undefined, createdFrom: "section", rule: "heading",

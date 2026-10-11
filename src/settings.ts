@@ -218,7 +218,9 @@ export class FlashCardSettingTab extends PluginSettingTab {
     return d.createDiv({ cls: "fcb-set-body" });
   }
 
-  private sub(el: HTMLElement, title: string): void { el.createEl("h4", { cls: "fcb-set-sub", text: title }); }
+  private sub(el: HTMLElement, title: string): void {
+    new Setting(el).setName(title).setHeading();
+  }
 
   display(): void {
     const el = this.containerEl;
