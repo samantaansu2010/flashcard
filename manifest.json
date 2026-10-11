@@ -3,7 +3,7 @@
   "name": "FlashCard",
   "version": "0.1.1",
   "minAppVersion": "1.4.2",
-  "description": " Obsidian plugin: automatic flashcards, spaced repetition, active recall and retention analytics. Local and free.",
+  "description": " automatic flashcards, spaced repetition, active recall and retention analytics. Local and free.",
   "author": "Ansu Samanta",
   "isDesktopOnly": false
 }
