@@ -3,7 +3,7 @@
   "name": "FlashCard",
   "version": "0.1.1",
   "minAppVersion": "1.7.2",
-  "description": " automatic flashcards, spaced repetition, active recall and retention analytics. Local and free.",
+  "description": "Automatic flashcards, spaced repetition, active recall and retention analytics. Local and free.",
   "author": "Ansu Samanta",
   "isDesktopOnly": false
 }
