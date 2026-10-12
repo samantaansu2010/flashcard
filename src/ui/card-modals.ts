@@ -40,8 +40,8 @@ export class CreateCardModal extends Modal {
     const f = textArea(el, "Front", front, 3, (v) => (front = v));
     const b = textArea(el, "Back", back, 4, (v) => (back = v));
     const inputs = el.querySelectorAll("textarea");
-    setFront = (v) => { front = v; (inputs[0] as HTMLTextAreaElement).value = v; };
-    setBack = (v) => { back = v; (inputs[1] as HTMLTextAreaElement).value = v; };
+    setFront = (v) => { front = v; inputs[0].value = v; };
+    setBack = (v) => { back = v; inputs[1].value = v; };
     const deck = deckField(el, this.p, this.init.deck ?? this.p.settings.lastDeck);
     const tags = tagsField(el, this.init.tags ?? []);
     new Setting(el).setName("Source").setDesc(srcLabel(this.init.source));
