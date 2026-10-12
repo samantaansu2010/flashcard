@@ -27,9 +27,14 @@ export function openCardMenu(p: FlashCardBook, card: Card, evt: MouseEvent | { x
   menu.addItem((i) => i.setTitle("Edit").setIcon("pencil").onClick(() => new EditCardModal(p.app, p, card, onChange).open()));
   menu.addItem((i) => i.setTitle("Open source").setIcon("file-text").onClick(() => void p.cards.openSource(card)));
   menu.addItem((i) => i.setTitle("Regenerate").setIcon("refresh-cw").onClick(() => void regenerate(p, card, onChange)));
-  menu.addItem((i) => i.setTitle("Move to deck…").setIcon("folder-input").onClick(() => new DeckPickModal(p.app, p, async (d) => {
-    const err = await p.cards.moveCard(card, d);
-    new Notice(err ? `FlashCard Book: ${err}` : `FlashCard Book: moved to “${deckLabel(d)}”.`); done();
+  menu.addItem((i) => i.setTitle("Move to deck…").setIcon("folder-input").onClick(() => new DeckPickModal(p.app, p, (d) => {
+    void p.cards.moveCard(card, d).then((err) => {
+      new Notice(err ? `FlashCard Book: ${err}` : `FlashCard Book: moved to “${deckLabel(d)}”.`);
+      done();
+    }).catch((e: unknown) => {
+      console.error("[flashcard-book] move card failed", e);
+      new Notice(`FlashCard Book: could not move card (${e instanceof Error ? e.message : String(e)}).`, 10000);
+    });
   }).open()));
   menu.addItem((i) => i.setTitle("Add tags…").setIcon("tag").onClick(() => new PromptModal(p.app, "Add tags", "", () => null, (v) => {
     p.cards.setTags(card, [...(p.store.metaFor(card)?.tags ?? []), ...normalizeTags(v)]); done();
