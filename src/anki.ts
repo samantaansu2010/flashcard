@@ -73,7 +73,7 @@ export async function importApkg(bytes: Uint8Array): Promise<ImportResult> {
       const kind = tryFields(m.config as Uint8Array | null).find((f) => f.no === 1 && f.wire === 0)?.num ?? 0; // 0 normal, 1 cloze
       models.set(id, { name: s(m.name), cloze: kind === 1, tmpls: tmplCount.get(id) ?? 1, fields: fieldCount.get(id) ?? 2 });
     }
-    for (const d of db.objects("decks")) decks.set(n(d.id), s(d.name).replace(/\x1f/g, "/"));
+    for (const d of db.objects("decks")) decks.set(n(d.id), s(d.name).split("\x1f").join("/"));
   } else {
     const modelsJson = s(col.models), decksJson = s(col.decks);
     if (!modelsJson || modelsJson === "{}") { res.warnings.push("This collection uses a database layout this plugin does not recognise. In Anki, export again as “Anki Deck Package (.apkg)”."); return res; }
