@@ -1,4 +1,4 @@
-import { ItemView, MarkdownRenderer, WorkspaceLeaf } from "obsidian";
+import { Notice, ItemView, MarkdownRenderer, WorkspaceLeaf } from "obsidian";
 import type FlashCardBook from "../main";
 import { GUIDE } from "../guide";
 
