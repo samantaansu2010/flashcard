@@ -71,13 +71,16 @@ const qaShort = qaRule(
 
 /* ───────────── Rule 8: Tables ───────────── */
 
+const ESCAPED_PIPE = "\uE000";
+const LINK_PIPE = "\uE001";
+
 const SEP = /^\s*\|?\s*:?-{2,}:?\s*(?:\|\s*:?-{2,}:?\s*)*\|?\s*$/;
 
 function splitRow(line: string): string[] {
-  let s = line.trim().replace(/\\\|/g, "\u0002").replace(/\[\[[^\]]*?\]\]/g, (m) => m.replace(/\|/g, "\u0003"));
+  let s = line.trim().replace(/\\\|/g, ESCAPED_PIPE).replace(/\[\[[^\]]*?\]\]/g, (m) => m.replace(/\|/g, LINK_PIPE));
   if (s.startsWith("|")) s = s.slice(1);
   if (s.endsWith("|")) s = s.slice(0, -1);
-  return s.split("|").map((c) => c.replace(/[\u0002\u0003]/g, "|").replace(/<br\s*\/?>/gi, "\n").trim());
+  return s.split("|").map((c) => c.replace(/[\uE000\uE001]/g, "|").replace(/<br\s*\/?>/gi, "\n").trim());
 }
 
 const DEF_HEADER = /definition|meaning|description|explanation|defined|what it is|details?/i;
