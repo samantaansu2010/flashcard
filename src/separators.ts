@@ -41,7 +41,7 @@ export function validateSeparator(raw: string): string | null {
   if (!/^[\p{P}\p{S}]+$/u.test(s)) return "Separator must consist of punctuation or symbol characters only.";
   if (s === ".") return "A single period cannot be used as a separator.";
   if (AMBIGUOUS.has(s)) return `“${s}” is too ambiguous: it is ordinary Markdown or prose punctuation. Choose something more distinctive.`;
-  if (/[\[\]{}]/.test(s)) return "Separator cannot contain brackets or braces (they are used by links and cloze syntax).";
+  if (s.includes("[") || s.includes("]") || /[{}]/.test(s)) return "Separator cannot contain brackets or braces (they are used by links and cloze syntax).";
   if (s.includes("<") && s.includes(">")) return "Separator cannot look like an HTML tag.";
   return null;
 }
