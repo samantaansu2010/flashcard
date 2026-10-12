@@ -6,7 +6,7 @@ import { deckFromNotePath, deckFromOfficialPath, normalizeTags } from "./data";
 import { DupIndex } from "./dupes";
 import { normKey } from "./util";
 
-const yieldToUi = () => new Promise<void>((r) => setTimeout(r, 0));
+const yieldToUi = () => new Promise<void>((r) => window.setTimeout(r, 0));
 
 export interface SourceInfo { file: string; heading?: string; block?: string; line?: number; text?: string; fromMeta: boolean }
 
