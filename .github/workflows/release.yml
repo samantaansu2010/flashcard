@@ -1,0 +1,63 @@
+name: Release FlashCard
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Test and publish release assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out tagged commit
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build plugin
+        run: npm run build
+
+      - name: Verify tag and compatibility metadata
+        shell: bash
+        run: |
+          test "$GITHUB_REF_NAME" = "$(node -p "require('./manifest.json').version")"
+          test "$GITHUB_REF_NAME" = "$(node -p "require('./package.json').version")"
+          node -e "const m=require('./manifest.json'), v=require('./versions.json'); if (v[m.version] !== m.minAppVersion) process.exit(1)"
+
+      - name: Publish release with plugin assets
+        uses: softprops/action-gh-release@v2
+        with:
+          name: FlashCard ${{ github.ref_name }}
+          body: |
+            ## FlashCard
+
+            Automatic flashcards, spaced repetition, active recall, and retention analytics. Local and free.
+
+            ## Requirements
+            Obsidian 1.7.2 or newer.
+
+            ## Included files
+            - `main.js`: production plugin bundle
+            - `manifest.json`: plugin metadata
+            - `styles.css`: plugin styles
+
+            The release is published only after the test suite, production build, and version checks pass.
+          files: |
+            main.js
+            manifest.json
+            styles.css
+          fail_on_unmatched_files: true
