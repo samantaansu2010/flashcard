@@ -25,7 +25,7 @@ export function computeAnalytics(p: FlashCardBook, now = Date.now()): Analytics 
   const states = p.store.states;
   const a: Analytics = {
     total: p.index.cards.size, fresh: 0, learning: 0, young: 0, mature: 0, suspended: 0, dueNow: 0, orphaned: 0,
-    forecast: new Array(30).fill(0), retention30: null, retentionAll: null, reviewsAll: 0,
+    forecast: Array.from({ length: 30 }, () => 0), retention30: null, retentionAll: null, reviewsAll: 0,
     avgRetrievability: null, streak: 0, longestStreak: 0, todayReviews: 0, todayMinutes: 0,
     heat: [], weakNotes: [], leeches: [], ratings: [0, 0, 0, 0],
   };
