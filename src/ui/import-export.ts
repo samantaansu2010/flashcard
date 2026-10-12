@@ -121,17 +121,16 @@ export class ImportModal extends Modal {
     for (const d of this.p.cards.decks()) dl.createEl("option", { value: d });
     new Setting(this.box).setName("Put imported decks inside").setDesc("Optional parent deck, e.g. German or Imported/Anki. Leave empty to keep the original deck names.").addText((t) => { t.setValue(this.prefix).onChange((v) => (this.prefix = v)); t.inputEl.setAttr("list", "fcb-import-decks"); });
     if (hasSched) new Setting(this.box).setName("Import scheduling and review history").setDesc("Intervals, ease, due dates and your past reviews.").addToggle((t) => t.setValue(this.withSched).onChange((v) => (this.withSched = v)));
-    new Setting(this.box).addButton((b) => b.setButtonText(`Import ${r.cards.length} cards`).setCta().onClick(async () => {
+    new Setting(this.box).addButton((b) => b.setButtonText(`Import ${r.cards.length} cards`).setCta().onClick(() => {
       b.setDisabled(true).setButtonText("Importing…");
-      try {
-        const rep = await runImport(this.p, this.result!, { withSched: this.withSched, deckPrefix: normalizeDeck(this.prefix) });
+      void runImport(this.p, this.result!, { withSched: this.withSched, deckPrefix: normalizeDeck(this.prefix) }).then((rep) => {
         this.close();
         new ReportModal(this.app, rep).open();
-      } catch (e) {
+      }).catch((e: unknown) => {
         console.error("[flashcard-book] import failed", e);
         b.setDisabled(false).setButtonText(`Import ${r.cards.length} cards`);
         new Notice(`FlashCard Book: import failed (${e instanceof Error ? e.message : String(e)}). Nothing was changed if this happened before writing.`, 10000);
-      }
+      });
     }));
   }
   onClose(): void { this.contentEl.empty(); }
@@ -174,7 +173,15 @@ export class ExportModal extends Modal {
     };
     draw();
     new Setting(el).addButton((b) => b.setButtonText("Cancel").onClick(() => this.close()))
-      .addButton((b) => b.setButtonText("Copy").onClick(async () => { const { text } = this.build(); await navigator.clipboard.writeText(text); new Notice("FlashCard Book: export copied to the clipboard."); }))
+      .addButton((b) => b.setButtonText("Copy").onClick(() => {
+        const { text } = this.build();
+        void Promise.resolve().then(() => navigator.clipboard.writeText(text)).then(() => {
+          new Notice("FlashCard Book: export copied to the clipboard.");
+        }).catch((e: unknown) => {
+          console.error("[flashcard-book] clipboard export failed", e);
+          new Notice(`FlashCard Book: could not copy export (${e instanceof Error ? e.message : String(e)}).`, 10000);
+        });
+      }))
       .addButton((b) => b.setButtonText("Save to vault").setCta().onClick(() => void this.save()));
   }
 
