@@ -55,18 +55,18 @@ export function sanitizeData(raw: unknown, now = Date.now()): { data: PluginData
   if (isObj(r.meta)) for (const [id, v] of Object.entries(r.meta)) { const m = cleanMeta(v); if (m) meta[id] = m; else report.droppedMeta++; }
   const created: PluginData["created"] = {};
   if (isObj(r.created)) for (const [id, v] of Object.entries(r.created)) if (num(v)) created[id] = v;
-  return { data: { version: SCHEMA_VERSION, states, logs, meta, created, baselineAt: num(r.baselineAt) ? r.baselineAt : 0 || now }, report };
+  return { data: { version: SCHEMA_VERSION, states, logs, meta, created, baselineAt: num(r.baselineAt) ? r.baselineAt : now }, report };
 }
 
 /* ─── decks & tags ─── */
 
-const BAD_FILE_CHARS = /[\\:*?"<>|\u0000-\u001f]/g;
+const BAD_FILE_CHARS = /[\\:*?"<>|]/g;
 
 /** "Economics / Micro" → "Economics/Micro". Returns "" for the default deck. */
 export function normalizeDeck(input: string): string {
   return input
     .split(/[/\\]|::/)
-    .map((p) => p.replace(BAD_FILE_CHARS, " ").replace(/\s+/g, " ").trim())
+    .map((p) => Array.from(p, (ch) => ch.charCodeAt(0) < 32 ? " " : ch).join("").replace(BAD_FILE_CHARS, " ").replace(/\s+/g, " ").trim())
     .filter((p) => p && p !== "." && p !== "..")
     .join("/");
 }
