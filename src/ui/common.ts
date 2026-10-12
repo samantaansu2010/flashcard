@@ -22,7 +22,16 @@ export class ConfirmModal extends Modal {
     el.createEl("p", { cls: "fcb-prewrap", text: this.message });
     new Setting(el)
       .addButton((b) => b.setButtonText("Cancel").onClick(() => this.close()))
-      .addButton((b) => { b.setButtonText(this.confirmText).onClick(async () => { this.close(); await this.onConfirm(); }); if (this.danger) b.setWarning(); else b.setCta(); });
+      .addButton((b) => {
+        b.setButtonText(this.confirmText).onClick(() => {
+          this.close();
+          void Promise.resolve().then(() => this.onConfirm()).catch((e: unknown) => {
+            console.error("[flashcard-book] confirmation action failed", e);
+            new Notice(`FlashCard Book: action failed (${e instanceof Error ? e.message : String(e)}).`, 10000);
+          });
+        });
+        if (this.danger) b.setWarning(); else b.setCta();
+      });
   }
   onClose(): void { this.contentEl.empty(); }
 }
