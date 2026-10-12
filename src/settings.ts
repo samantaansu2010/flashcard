@@ -56,6 +56,8 @@ export interface Settings {
   lastDeck: string;
   /** Deck paths collapsed in the Decks screen. */
   collapsedDecks: string[];
+  /** Whether the first-run onboarding was dismissed in this vault. */
+  onboardingDismissed: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -95,6 +97,7 @@ export const DEFAULT_SETTINGS: Settings = {
   keys: { ...DEFAULT_KEYS },
   lastDeck: "",
   collapsedDecks: [],
+  onboardingDismissed: false,
 };
 
 const parseSteps = (s: string): number[] =>
