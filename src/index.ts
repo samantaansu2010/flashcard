@@ -36,7 +36,7 @@ export class CardIndex extends Events {
     const s = this.plugin.settings;
     if (file.extension !== "md") return false;
     const cache = this.plugin.app.metadataCache.getFileCache(file);
-    const fm = cache?.frontmatter?.flashcards;
+    const fm: unknown = cache?.frontmatter?.flashcards;
     if (fm === false || fm === "false") return false;
     if (this.isOfficial(file.path)) return true;
     if (!s.autoGenerate && !(fm === true || fm === "true")) return false;
