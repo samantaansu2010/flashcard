@@ -6,7 +6,6 @@ import { barChart, heatmap, lineChart, makeClickable, rowList } from "./charts";
 import { toCsv } from "../csv";
 import { openCardMenu } from "../ui/card-menu";
 import { deckLabel } from "../data";
-import { DAY } from "../util";
 import { Card } from "../types";
 
 export const DASH_VIEW = "flashcard-book-dashboard";
