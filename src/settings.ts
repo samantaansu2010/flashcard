@@ -4,7 +4,7 @@ import { RULES } from "./extract/engine";
 import { SchedConfig } from "./scheduler";
 import { BUILTIN_SEPARATORS, DEFAULT_SEPARATOR, SeparatorDef, normalizeSeparators, separatorExample, validateSeparator } from "./separators";
 import { normalizePath } from "obsidian";
-import { PromptModal } from "./ui/common";
+import { PromptModal, setDestructiveStyle } from "./ui/common";
 
 export type KeyAction = "showAnswer" | "again" | "hard" | "good" | "easy" | "skip" | "edit" | "undo" | "openSource" | "suspend" | "exit";
 export const KEY_LABELS: Record<KeyAction, string> = {
@@ -342,8 +342,10 @@ export class FlashCardSettingTab extends PluginSettingTab {
     new Setting(d)
       .setName("Reset all scheduling data")
       .setDesc("Deletes review history and intervals. Your notes and cards are never touched. A backup of the data file is saved first.")
-      .addButton((b) =>
-        b.setButtonText(this.confirmReset ? "Click again to confirm" : "Reset").setWarning().onClick(async () => {
+      .addButton((b) => {
+        b.setButtonText(this.confirmReset ? "Click again to confirm" : "Reset");
+        setDestructiveStyle(b);
+        b.onClick(async () => {
           if (!this.confirmReset) { this.confirmReset = true; b.setButtonText("Click again to confirm"); return; }
           this.confirmReset = false;
           await this.plugin.backupData("before-reset");
@@ -351,7 +353,8 @@ export class FlashCardSettingTab extends PluginSettingTab {
           this.plugin.refreshUi();
           new Notice("FlashCard Book: scheduling data reset (a backup was saved next to the plugin data).");
           this.display();
-        }));
+        });
+      });
 
     /* ── Help ── */
     const h = this.group(el, "help", "Help", "User guide");
