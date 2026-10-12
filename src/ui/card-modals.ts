@@ -60,7 +60,7 @@ export class CreateCardModal extends Modal {
         }));
     };
     render();
-    window.setTimeout(() => (el.querySelector("textarea") as HTMLTextAreaElement | null)?.focus(), 0);
+    window.setTimeout(() => el.querySelector<HTMLTextAreaElement>("textarea")?.focus(), 0);
   }
 
   private async save(c: NewCard): Promise<void> {
