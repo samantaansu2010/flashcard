@@ -12,12 +12,12 @@ export interface Events { created: Ev[]; matured: Ev[]; suspended: Ev[] }
 
 export function prepareLogs(logs: LogEntry[], resolve: (id: string) => { deck: string; tags: string[] }): PLog[] {
   const cache = new Map<string, { deck: string; tags: string[] }>();
-  const out: PLog[] = new Array(logs.length);
+  const out: PLog[] = []
   for (let i = 0; i < logs.length; i++) {
     const l = logs[i];
     let r = cache.get(l[1]);
     if (!r) { r = resolve(l[1]); cache.set(l[1], r); }
-    out[i] = { ts: l[0], id: l[1], grade: l[2], ms: l[3], phase: l[4], iv: l[5], sim: l[6], deck: r.deck, tags: r.tags };
+    out.push({ ts: l[0], id: l[1], grade: l[2], ms: l[3], phase: l[4], iv: l[5], sim: l[6], deck: r.deck, tags: r.tags });
   }
   return out;
 }
