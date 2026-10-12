@@ -70,7 +70,8 @@ export async function importApkg(bytes: Uint8Array): Promise<ImportResult> {
     for (const t of db.objects("templates")) tmplCount.set(n(t.ntid), (tmplCount.get(n(t.ntid)) ?? 0) + 1);
     for (const m of db.objects("notetypes")) {
       const id = n(m.id);
-      const kind = tryFields(m.config).find((f) => f.no === 1 && f.wire === 0)?.num ?? 0; // 0 normal, 1 cloze
+      const config = m.config instanceof Uint8Array ? m.config : null;
+      const kind = tryFields(config).find((f) => f.no === 1 && f.wire === 0)?.num ?? 0; // 0 normal, 1 cloze
       models.set(id, { name: s(m.name), cloze: kind === 1, tmpls: tmplCount.get(id) ?? 1, fields: fieldCount.get(id) ?? 2 });
     }
     for (const d of db.objects("decks")) decks.set(n(d.id), s(d.name).split("\x1f").join("/"));
