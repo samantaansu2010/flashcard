@@ -9,7 +9,6 @@ import { ExportModal } from "../ui/import-export";
 import { renderQuickAdd } from "../ui/quick-add";
 
 export const DECKS_VIEW = "flashcard-book-decks";
-const ONBOARD_KEY = "fcb-onboard-dismissed";
 
 /**
  * Home screen. Top: a thin nav bar and the two numbers that matter (Due, New). Middle: your decks, each one line
@@ -40,7 +39,11 @@ export class DecksView extends ItemView {
     this.render();
   }
 
-  private dismissOnboarding(): void { window.localStorage.setItem(ONBOARD_KEY, "1"); this.render(); }
+  private dismissOnboarding(): void {
+    this.plugin.settings.onboardingDismissed = true;
+    void this.plugin.saveSettings(false);
+    this.render();
+  }
 
   render(): void {
     const p = this.plugin;
@@ -69,7 +72,7 @@ export class DecksView extends ItemView {
     const hasAnyCards = p.index.cards.size > 0;
 
     /* onboarding: shown once, only while the collection is still empty */
-    if (!hasAnyCards && !p.index.scanning && window.localStorage.getItem(ONBOARD_KEY) !== "1") {
+    if (!hasAnyCards && !p.index.scanning && !p.settings.onboardingDismissed) {
       const ob = root.createDiv({ cls: "fcb-onboard" });
       ob.createEl("h2", { text: "Welcome to FlashCard Book" });
       ob.createEl("p", { text: "Two ways to get your first card:" });
