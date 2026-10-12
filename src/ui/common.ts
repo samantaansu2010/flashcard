@@ -1,8 +1,19 @@
-import { App, Modal, Notice, Setting } from "obsidian";
+import { App, ButtonComponent, Modal, Notice, Setting } from "obsidian";
 import type FlashCardBook from "../main";
 import { normalizeDeck, normalizeTags } from "../data";
 
 export type ModalSize = "sm" | "md" | "lg";
+
+/** Use the current destructive-button API when available, with a fallback for older supported Obsidian versions. */
+export function setDestructiveStyle(button: ButtonComponent, destructive = true): void {
+  const modern = button as unknown as { setDestructive?: (destructive?: boolean) => unknown };
+  if (typeof modern.setDestructive === "function") {
+    modern.setDestructive(destructive);
+    return;
+  }
+  const fallback: unknown = Reflect.get(button, destructive ? "setWarning" : "setCta");
+  if (typeof fallback === "function") fallback.call(button);
+}
 
 /**
  * Give a modal a sensible, responsive width. The shell (`modalEl`) is sized, not the content, so dialogs are never
@@ -30,7 +41,7 @@ export class ConfirmModal extends Modal {
             new Notice(`FlashCard Book: action failed (${e instanceof Error ? e.message : String(e)}).`, 10000);
           });
         });
-        if (this.danger) b.setWarning(); else b.setCta();
+        setDestructiveStyle(b, this.danger);
       });
   }
   onClose(): void { this.contentEl.empty(); }
