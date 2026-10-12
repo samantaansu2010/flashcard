@@ -30,7 +30,7 @@ export class GuideView extends ItemView {
       if (!hits.length) list.createDiv({ cls: "fcb-note", text: "No section matches." });
       for (const s of hits) {
         const a = list.createDiv({ cls: "fcb-guide-link" + (s.id === this.current ? " is-active" : ""), text: s.title });
-        a.onclick = () => { this.current = s.id; drawNav(); drawBody(); };
+        a.onclick = () => { this.current = s.id; drawNav(); void drawBody().catch((e: unknown) => { console.error("[flashcard-book] guide rendering failed", e); new Notice("FlashCard Book: could not load this guide section.", 8000); }); };
       }
     };
     const drawBody = async (): Promise<void> => {
