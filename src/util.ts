@@ -40,17 +40,19 @@ export function wordCount(s: string): number {
   return m ? m.length : 0;
 }
 
+const SENTENCE_DOT = "\uE002";
+
 const ABBR = /\b(e\.g|i\.e|etc|vs|cf|approx|fig|eq|dr|mr|mrs|ms|prof|st|no|inc|ltd|al)\./gi;
 
 export function splitSentences(text: string): string[] {
   const masked = text
-    .replace(ABBR, (m) => m.replace(/\./g, "\u0001"))
-    .replace(/\.(?=[\p{L}\p{N}])/gu, "\u0001");
+    .replace(ABBR, (m) => m.replace(/\./g, SENTENCE_DOT))
+    .replace(/\.(?=[\p{L}\p{N}])/gu, SENTENCE_DOT);
   const out: string[] = [];
   const re = /[^.!?]+(?:[.!?]+["'”’)\]]*(?=\s|$)|$)/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(masked))) {
-    const t = m[0].replace(/\u0001/g, ".").trim();
+    const t = m[0].split(SENTENCE_DOT).join(".").trim();
     if (t) out.push(t);
   }
   return out;
