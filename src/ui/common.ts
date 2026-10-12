@@ -1,4 +1,4 @@
-import { App, Modal, Setting } from "obsidian";
+import { App, Modal, Notice, Setting } from "obsidian";
 import type FlashCardBook from "../main";
 import { normalizeDeck, normalizeTags } from "../data";
 
