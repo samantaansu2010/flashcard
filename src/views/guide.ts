@@ -30,7 +30,7 @@ export class GuideView extends ItemView {
       if (!hits.length) list.createDiv({ cls: "fcb-note", text: "No section matches." });
       for (const s of hits) {
         const a = list.createDiv({ cls: "fcb-guide-link" + (s.id === this.current ? " is-active" : ""), text: s.title });
-        a.onclick = () => { this.current = s.id; drawNav(); void drawBody().catch((e: unknown) => { console.error("[flashcard-book] guide rendering failed", e); new Notice("FlashCard Book: could not load this guide section.", 8000); }); };
+        a.onclick = () => { this.current = s.id; drawNav(); loadBody(); };
       }
     };
     const drawBody = async (): Promise<void> => {
@@ -40,11 +40,17 @@ export class GuideView extends ItemView {
       await MarkdownRenderer.render(this.app, s.body, body, "", this);
       const i = GUIDE.indexOf(s);
       const foot = body.createDiv({ cls: "fcb-actions" });
-      if (i > 0) foot.createEl("button", { text: `← ${GUIDE[i - 1].title}` }).onclick = () => { this.current = GUIDE[i - 1].id; drawNav(); void drawBody(); };
-      if (i < GUIDE.length - 1) foot.createEl("button", { cls: "mod-cta", text: `${GUIDE[i + 1].title} →` }).onclick = () => { this.current = GUIDE[i + 1].id; drawNav(); void drawBody(); };
+      if (i > 0) foot.createEl("button", { text: `← ${GUIDE[i - 1].title}` }).onclick = () => { this.current = GUIDE[i - 1].id; drawNav(); loadBody(); };
+      if (i < GUIDE.length - 1) foot.createEl("button", { cls: "mod-cta", text: `${GUIDE[i + 1].title} →` }).onclick = () => { this.current = GUIDE[i + 1].id; drawNav(); loadBody(); };
+    };
+    const loadBody = (): void => {
+      void drawBody().catch((e: unknown) => {
+        console.error("[flashcard-book] guide rendering failed", e);
+        new Notice("FlashCard Book: could not load this guide section.", 8000);
+      });
     };
     search.oninput = () => { this.query = search.value; drawNav(); };
     drawNav();
-    void drawBody();
+    loadBody();
   }
 }
