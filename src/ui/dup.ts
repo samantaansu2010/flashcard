@@ -2,6 +2,7 @@ import { Setting } from "obsidian";
 import type FlashCardBook from "../main";
 import { DUP_LABEL, Dup } from "../dupes";
 import { deckLabel } from "../data";
+import { setDestructiveStyle } from "./common";
 
 export interface DupCandidate { front: string; back: string; deck: string; source?: { file: string; heading?: string; line?: number } }
 
@@ -33,6 +34,6 @@ export function renderDupCompare(p: FlashCardBook, parent: HTMLElement, dup: Dup
 export function dupActions(parent: HTMLElement, o: { onSkip: () => void; onCreate: () => void; onEdit: () => void }): void {
   new Setting(parent)
     .addButton((b) => b.setButtonText("Skip").setCta().onClick(o.onSkip))
-    .addButton((b) => b.setButtonText("Create anyway").setWarning().onClick(o.onCreate))
+    .addButton((b) => { b.setButtonText("Create anyway"); setDestructiveStyle(b); b.onClick(o.onCreate); })
     .addButton((b) => b.setButtonText("Edit existing").onClick(o.onEdit));
 }
