@@ -35,7 +35,7 @@ const ok = (n, c, i) => { if (!c) { failed++; console.log("FAIL:", n, i ?? ""); 
 const vault = new FakeVault();
 const cache = new Map();
 const settings = {
-  cardFolder: "FlashCard Book", autoGenerate: true, scopeMode: "all", scopeTag: "", scopeFolders: [], excludeFolders: [],
+  cardFolder: "FlashCard Book", autoGenerate: false, scopeMode: "all", scopeTag: "", scopeFolders: [], excludeFolders: [],
   rules: Object.fromEntries(RULES.map((r) => [r.id, true])), maxAnswerChars: 600, maxTermWords: 6, lowercaseTerms: true, genericTables: true, clozeBold: false,
   separators: BUILTIN_SEPARATORS.map((b) => ({ ...b })), defaultSeparator: "::", inheritTags: true, skipBehavior: "later", newPerDay: 20, reviewsPerDay: 200, mixNew: false,
   dayStartHour: 4, lastDeck: "", learningSteps: "1 10", relearningSteps: "10", graduatingInterval: 1, easyInterval: 4, startingEase: 2.5, easyBonus: 1.3, hardMultiplier: 1.2, intervalModifier: 1, lapseMultiplier: 0.5, maxInterval: 36500,
@@ -54,11 +54,19 @@ p.index = new CardIndex(p);
 p.cards = new CardService(p);
 p.cardsForScope = (scope) => [...p.index.cards.values()];
 
-// an ordinary note with an auto-detected card
+// A fresh install leaves ordinary notes alone until automatic generation is enabled.
 await vault.create("Econ/note.md", "# Micro\n\nOpportunity cost: the value of the next best alternative that is given up\n");
 cache.set("Econ/note.md", { tags: ["#econ"] });
 await p.index.scanAll();
-ok("Auto card exists before manual cards", p.index.cards.size === 1 && [...p.index.cards.values()][0].rule === "colon");
+ok("New-install default does not auto-generate cards from ordinary notes", ![...p.index.cards.values()].some((c) => c.path === "Econ/note.md"));
+
+const optedInFile = new TFile("OptIn/yes.md");
+cache.set(optedInFile.path, { frontmatter: { flashcards: true }, tags: [] });
+ok("flashcards: true opts a note in while automatic generation is off", p.index.eligible(optedInFile));
+
+settings.autoGenerate = true;
+await p.index.scanAll();
+ok("Enabling automatic generation discovers eligible note cards", p.index.cards.size === 1 && [...p.index.cards.values()][0].rule === "colon");
 const auto = [...p.index.cards.values()][0];
 ok("Auto card deck = note folder; heading recorded; tags inherited", p.index.deckOf(auto) === "Econ" && auto.heading === "Micro" && p.index.tagsOf(auto).join() === "econ", p.index.deckOf(auto) + auto.heading + p.index.tagsOf(auto));
 
