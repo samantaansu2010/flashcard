@@ -1,9 +1,9 @@
 # FlashCard
 
-**Notes → automatic flashcards → spaced repetition → active recall → answer comparison → retention analytics.**
+**Your notes → flashcards on your terms → spaced repetition → active recall → answer comparison → retention analytics.**
 Everything runs locally inside Obsidian. No AI model, no API key, no account, no network access, no subscription.
 
-You write normal Markdown. FlashCard reads it with a set of deterministic rules, turns the recall-worthy parts into cards, schedules them, and measures whether you actually remember. Cards are never written into your notes; edit the note and the cards follow.
+You write normal Markdown. When you enable automatic generation, FlashCard can read notes with deterministic rules and turn recall-worthy parts into cards. By default, new installs do not scan ordinary notes automatically. Cards are never written into your notes; edit the note and any generated cards follow.
 
 
 
@@ -50,7 +50,7 @@ You write normal Markdown. FlashCard reads it with a set of deterministic rules,
 
 Right-click a file in the explorer for *Generate Flashcards*, *Review Cards from This Note*, *Open FlashCard Cards*. Every bulk action shows a **preview** (select, edit, remove, change deck/tags, duplicates flagged) before anything is saved. Your notes are never modified.
 
-**Automatic** — the rule engine below reads notes and finds cards. It can be switched off completely; manual creation keeps working.
+**Automatic (off by default on new installs)** — turn on *Generate cards automatically from notes* in **Settings → Automatic generation** to scan ordinary notes. Choose all notes, a tag, or specific folders, and add exclusions before enabling it. Manual creation works without this setting. A note with `flashcards: true` explicitly opts in even while global automatic generation is off; `flashcards: false` opts out.
 
 ## The FlashCard folder
 
@@ -70,12 +70,14 @@ Cards you create live in real Markdown files under `FlashCard/` (configurable); 
 * Anki text export cannot carry scheduling (a limitation of that format).
 * “Cards created” is counted only from the moment tracking began; older cards have no known creation date.
 
-## Getting started (automatic generation)
+## Getting started (automatic generation is off by default)
 
 1. Install (see below) and enable the plugin.
-2. Write notes as you normally would (see the formats below).
-3. Run **Review all due cards** (ribbon icon 🗂, status bar counter, or the command palette).
-4. Run **Preview cards of the current note** to see exactly what was generated (and switch off cards you don't want).
+2. Create your first card by selecting text and choosing **Create Flashcard from Selection**, typing a `Question :: Answer` line inside the FlashCard Book folder, or importing a deck. Manual card creation works immediately.
+3. Open **Decks** and start reviewing your new card.
+4. To scan ordinary notes automatically, open **Settings → Automatic generation**, choose your scope and exclusions, then turn on **Generate cards automatically from notes**. Review the generated cards in the browser; your source notes are never modified.
+
+For a note-by-note opt-in, add `flashcards: true` to its properties. Use `flashcards: false` to exclude a note. Existing users' saved automatic-generation preference is preserved when they update.
 
 ## What becomes a card
 
@@ -94,7 +96,7 @@ Cards you create live in real Markdown files under `FlashCard/` (configurable); 
 * One note can trigger many rules. Explicit Q/A pairs, tables, bullets and colon lines claim their lines first, so fuzzier rules don't re-read them.
 * Identical questions inside a note are merged (highest-priority rule wins), so a heading *and* its definition sentence give one card, not two.
 * Code blocks, frontmatter, math blocks, `%%comments%%` and task lists are ignored. Labels like `Note:`, `TODO:`, `Example:` never become cards. Headings like *Summary*, *References*, *Chapter 3*, dates are skipped.
-* Opt a note out with `flashcards: false` in its properties (or in with `flashcards: true`). Settings can restrict card generation to a tag or folders, and exclude folders.
+* Automatic generation is off by default on new installs. `flashcards: true` explicitly opts a note in; `flashcards: false` opts it out. When automatic generation is enabled globally, settings can restrict generation to a tag or folders and exclude folders.
 * Any card can be suspended from the preview window or the review screen.
 
 ## Reviewing
