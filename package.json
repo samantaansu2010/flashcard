@@ -1,12 +1,12 @@
 {
   "name": "flashcard",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Automatic flashcards, spaced repetition, active recall and retention analytics. Local and free.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-    "test": "node scripts/test.mjs && node scripts/test-zstd.mjs && node scripts/test-integration.mjs && node scripts/test-tz.mjs"
+    "test": "node scripts/test-defaults.mjs && node scripts/test.mjs && node scripts/test-zstd.mjs && node scripts/test-integration.mjs && node scripts/test-tz.mjs"
   },
   "license": "MIT",
   "devDependencies": {
