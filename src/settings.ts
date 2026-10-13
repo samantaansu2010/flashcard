@@ -89,7 +89,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showComparison: true,
   statusBar: true,
   cardFolder: "FlashCard Book",
-  autoGenerate: true,
+  autoGenerate: false,
   separators: BUILTIN_SEPARATORS.map((b) => ({ ...b })),
   defaultSeparator: DEFAULT_SEPARATOR,
   inheritTags: true,
