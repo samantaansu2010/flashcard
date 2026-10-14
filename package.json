@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-    "test": "node scripts/test-defaults.mjs && node scripts/test.mjs && node scripts/test-zstd.mjs && node scripts/test-integration.mjs && node scripts/test-tz.mjs"
+    "test": "node scripts/test-release-metadata.mjs && node scripts/test-defaults.mjs && node scripts/test.mjs && node scripts/test-zstd.mjs && node scripts/test-integration.mjs && node scripts/test-tz.mjs"
   },
   "license": "MIT",
   "devDependencies": {
