@@ -97,6 +97,7 @@ For a note-by-note opt-in, add `flashcards: true` to its properties. Use `flashc
 * Identical questions inside a note are merged (highest-priority rule wins), so a heading *and* its definition sentence give one card, not two.
 * Code blocks, frontmatter, math blocks, `%%comments%%` and task lists are ignored. Labels like `Note:`, `TODO:`, `Example:` never become cards. Headings like *Summary*, *References*, *Chapter 3*, dates are skipped.
 * Automatic generation is off by default on new installs. `flashcards: true` explicitly opts a note in; `flashcards: false` opts it out. When automatic generation is enabled globally, settings can restrict generation to a tag or folders and exclude folders.
+* When automatic generation is enabled, notes inside folders named `Template`, `Templates`, `_template`, or `_templates` are excluded by default, even when nested. Change **Ignore template folders** in Settings if you intentionally want to study those files. Unresolved Templater expressions (`<% … %>`) and common unresolved Core Templates placeholders (`{{date}}`, `{{time}}`, `{{title}}`) are ignored rather than becoming card answers.
 * Any card can be suspended from the preview window or the review screen.
 
 ## Reviewing
