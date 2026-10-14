@@ -28,7 +28,7 @@ export interface Block { text: string; line: number }
 export interface Ctx {
   path: string;
   lines: string[];
-  /** frontmatter, code, math and comment lines: never processed */
+  /** Frontmatter, code, math, comment and unresolved template-expression lines: never processed */
   skip: Set<number>;
   /** lines already consumed by a higher-priority rule */
   claimed: Set<number>;
@@ -61,7 +61,8 @@ export function buildSkip(lines: string[]): Set<number> {
     }
   }
   let fence: string | null = null;
-  let block: string | null = null; // "$$" or "%%"
+  let block: string | null = null; // "$" or "%%"
+  let templaterBlock = false;
   for (; i < lines.length; i++) {
     const l = lines[i];
     const t = l.trim();
@@ -77,7 +78,23 @@ export function buildSkip(lines: string[]): Set<number> {
     }
     const fm = /^(`{3,}|~{3,})/.exec(t);
     if (fm) { fence = fm[1][0]; skip.add(i); continue; }
-    for (const marker of ["$$", "%%"]) {
+    if (templaterBlock) {
+      skip.add(i);
+      if (l.includes("%>")) templaterBlock = false;
+      continue;
+    }
+    const templateStart = l.indexOf("<%");
+    if (templateStart >= 0) {
+      skip.add(i);
+      if (l.indexOf("%>", templateStart + 2) < 0) templaterBlock = true;
+      continue;
+    }
+    // Obsidian Core Templates placeholders; do not turn unresolved dates/titles into study cards.
+    if (/\\{\\{\\s*(?:title|date|time)(?::[^{}]*)?\\s*\\}\\}/i.test(l)) {
+      skip.add(i);
+      continue;
+    }
+    for (const marker of ["$", "%%"]) {
       if (t.startsWith(marker)) {
         skip.add(i);
         if (t.indexOf(marker, 2) === -1) block = marker;
