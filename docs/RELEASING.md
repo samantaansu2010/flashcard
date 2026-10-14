@@ -8,7 +8,7 @@ This checklist is for maintainers publishing a user-facing plugin version. Do no
 2. Run `npm ci --legacy-peer-deps`, `npm test`, and `npm run build`.
 3. Set the same release version in `package.json` and `manifest.json`.
 4. Add the version-to-minimum-Obsidian mapping to `versions.json`. The current manifest version must map to its `minAppVersion`.
-5. Update the release notes with user-visible changes, compatibility requirements, and known limitations.
+5. Add `releases/<version>.md` with user-visible changes, compatibility requirements, and upgrade notes. The release workflow publishes this file as the GitHub release description.
 6. Inspect the diff for generated bundles, secrets, local paths, or user data that should not be committed.
 
 ## Publish
