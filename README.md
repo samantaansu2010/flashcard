@@ -140,3 +140,11 @@ The plugin makes no network requests. Review history and scheduling live in the 
 * Rule-based extraction is precise rather than exhaustive: it will miss definitions phrased in unusual ways. Use `Q. / A.`, colon or cloze syntax for anything important.
 * “What is paris?”: with *Lowercase terms* on, a one-word proper noun that starts a sentence is lowercased. Turn the option off, or use a colon definition, if this bothers you.
 * The card index is rebuilt in memory at startup (fast for typical vaults; large vaults scan in the background).
+
+## Project and contribution docs
+
+- [Architecture overview](docs/ARCHITECTURE.md)
+- [Testing guide](docs/TESTING.md)
+- [Release checklist](docs/RELEASING.md)
+- [Contributor guide](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
