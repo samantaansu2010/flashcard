@@ -1,0 +1,67 @@
+name: Bug report
+description: Report a reproducible problem with FlashCard
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not attach your Obsidian vault or private study notes. Use synthetic examples whenever possible.
+  - type: input
+    id: version
+    attributes:
+      label: FlashCard version
+      description: Find this in the plugin details or manifest.
+      placeholder: "0.1.3"
+    validations:
+      required: true
+  - type: input
+    id: obsidian
+    attributes:
+      label: Obsidian version
+      placeholder: "1.7.2"
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Android
+        - iOS
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use a short numbered list and synthetic note content.
+      placeholder: |
+        1. Open a test vault.
+        2. Create a note with...
+        3. Run...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console errors or logs
+      description: Remove personal paths, tokens, and private note content before sharing.
+    validations:
+      required: false

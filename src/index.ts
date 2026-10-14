@@ -10,6 +10,11 @@ const yieldToUi = () => new Promise<void>((r) => window.setTimeout(r, 0));
 
 export interface SourceInfo { file: string; heading?: string; block?: string; line?: number; text?: string; fromMeta: boolean }
 
+/** Template files are source material, not finished study notes. Match directory segments, including nested folders. */
+function isTemplateFolderPath(filePath: string): boolean {
+  return filePath.split("/").slice(0, -1).some((segment) => /^_?templates?$/i.test(segment.trim()));
+}
+
 /**
  * In-memory index of all cards, kept in sync with the vault incrementally.
  * Cards live in Markdown (your notes, or files in the FlashCard Book folder); this index is a cache that can always be rebuilt.
@@ -24,6 +29,10 @@ export class CardIndex extends Events {
   private tagCache = new Map<string, string[]>();
   private dupCache: DupIndex | null = null;
   scanning = false;
+  /** The active vault scan; concurrent callers wait for it instead of reading a half-cleared index. */
+  private scanPromise: Promise<void> | null = null;
+  /** A settings change or manual rescan during a scan schedules one fresh pass afterward. */
+  private rescanRequested = false;
   /** Increments on every change; lets views cache derived data. */
   version = 0;
   private notify = debounce(() => this.plugin.refreshUi(), 300, true);
@@ -39,6 +48,7 @@ export class CardIndex extends Events {
     const fm: unknown = cache?.frontmatter?.flashcards;
     if (fm === false || fm === "false") return false;
     if (this.isOfficial(file.path)) return true;
+    if (s.excludeTemplateFolders && isTemplateFolderPath(file.path)) return false;
     if (!s.autoGenerate && !(fm === true || fm === "true")) return false;
     const inFolder = (f: string) => file.path === f || file.path.startsWith(f + "/");
     if (s.excludeFolders.some(inFolder)) return false;
@@ -153,7 +163,7 @@ export class CardIndex extends Events {
     if (!this.eligible(file)) { this.removePath(file.path, silent); return; }
     const text = await this.plugin.app.vault.cachedRead(file);
     const official = this.isOfficial(file.path);
-    const opts = { ...this.plugin.extractOptions(), separators: official ? this.plugin.enabledSeparators() : undefined };
+    const opts = { ...this.plugin.extractOptions(), separators: official ? this.plugin.enabledSeparators() : undefined, ignoreTemplateExpressions: !official };
     this.set(file.path, extractCards(text, file.path, opts, this.plugin.enabledRules()), stamp);
     if (!silent) this.notify();
   }
@@ -163,23 +173,37 @@ export class CardIndex extends Events {
     if (!silent) this.notify();
   }
 
-  async scanAll(): Promise<void> {
-    if (this.scanning) return;
-    this.scanning = true;
-    try {
-      this.cards.clear(); this.byPath.clear(); this.raw.clear(); this.manualSrc.clear(); this.tagCache.clear();
-      const files = this.plugin.app.vault.getMarkdownFiles();
-      let n = 0;
-      // official files first so de-duplication against manual cards is exact from the start
-      files.sort((a, b) => Number(this.isOfficial(b.path)) - Number(this.isOfficial(a.path)));
-      for (const f of files) {
-        try { await this.updateFile(f, true, false); } catch (e) { console.error("[flashcard-book]", f.path, e); }
-        if (++n % 40 === 0) await yieldToUi();
-      }
-      this.rebuildSuppression();
-    } finally {
-      this.scanning = false;
-      this.plugin.refreshUi();
+  scanAll(): Promise<void> {
+    if (this.scanPromise) {
+      // The existing scan may have started before a setting changed. Finish it, then scan
+      // again with the latest settings. Callers share the promise and never see partial counts.
+      this.rescanRequested = true;
+      return this.scanPromise;
     }
+
+    this.scanning = true;
+    const scan = Promise.resolve().then(async () => {
+      try {
+        do {
+          this.rescanRequested = false;
+          this.cards.clear(); this.byPath.clear(); this.raw.clear(); this.manualSrc.clear(); this.tagCache.clear();
+          const files = this.plugin.app.vault.getMarkdownFiles();
+          let n = 0;
+          // official files first so de-duplication against manual cards is exact from the start
+          files.sort((a, b) => Number(this.isOfficial(b.path)) - Number(this.isOfficial(a.path)));
+          for (const f of files) {
+            try { await this.updateFile(f, true, false); } catch (e) { console.error("[flashcard-book]", f.path, e); }
+            if (++n % 40 === 0) await yieldToUi();
+          }
+          this.rebuildSuppression();
+        } while (this.rescanRequested);
+      } finally {
+        this.scanning = false;
+        if (this.scanPromise === scan) this.scanPromise = null;
+        this.plugin.refreshUi();
+      }
+    });
+    this.scanPromise = scan;
+    return scan;
   }
 }

@@ -97,6 +97,7 @@ For a note-by-note opt-in, add `flashcards: true` to its properties. Use `flashc
 * Identical questions inside a note are merged (highest-priority rule wins), so a heading *and* its definition sentence give one card, not two.
 * Code blocks, frontmatter, math blocks, `%%comments%%` and task lists are ignored. Labels like `Note:`, `TODO:`, `Example:` never become cards. Headings like *Summary*, *References*, *Chapter 3*, dates are skipped.
 * Automatic generation is off by default on new installs. `flashcards: true` explicitly opts a note in; `flashcards: false` opts it out. When automatic generation is enabled globally, settings can restrict generation to a tag or folders and exclude folders.
+* When automatic generation is enabled, notes inside folders named `Template`, `Templates`, `_template`, or `_templates` are excluded by default, even when nested. Change **Ignore template folders** in Settings if you intentionally want to study those files. During automatic indexing of ordinary notes, unresolved Templater expressions (`<% … %>`) and common unresolved Core Templates placeholders (`{{date}}`, `{{time}}`, `{{title}}`) are ignored rather than becoming card answers. Manual card creation can still preserve literal template syntax.
 * Any card can be suspended from the preview window or the review screen.
 
 ## Reviewing
@@ -139,3 +140,11 @@ The plugin makes no network requests. Review history and scheduling live in the 
 * Rule-based extraction is precise rather than exhaustive: it will miss definitions phrased in unusual ways. Use `Q. / A.`, colon or cloze syntax for anything important.
 * “What is paris?”: with *Lowercase terms* on, a one-word proper noun that starts a sentence is lowercased. Turn the option off, or use a colon definition, if this bothers you.
 * The card index is rebuilt in memory at startup (fast for typical vaults; large vaults scan in the background).
+
+## Project and contribution docs
+
+- [Architecture overview](docs/ARCHITECTURE.md)
+- [Testing guide](docs/TESTING.md)
+- [Release checklist](docs/RELEASING.md)
+- [Contributor guide](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)

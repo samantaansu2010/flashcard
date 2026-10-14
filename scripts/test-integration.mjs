@@ -35,7 +35,7 @@ const ok = (n, c, i) => { if (!c) { failed++; console.log("FAIL:", n, i ?? ""); 
 const vault = new FakeVault();
 const cache = new Map();
 const settings = {
-  cardFolder: "FlashCard Book", autoGenerate: false, scopeMode: "all", scopeTag: "", scopeFolders: [], excludeFolders: [],
+  cardFolder: "FlashCard Book", autoGenerate: false, excludeTemplateFolders: true, scopeMode: "all", scopeTag: "", scopeFolders: [], excludeFolders: [],
   rules: Object.fromEntries(RULES.map((r) => [r.id, true])), maxAnswerChars: 600, maxTermWords: 6, lowercaseTerms: true, genericTables: true, clozeBold: false,
   separators: BUILTIN_SEPARATORS.map((b) => ({ ...b })), defaultSeparator: "::", inheritTags: true, skipBehavior: "later", newPerDay: 20, reviewsPerDay: 200, mixNew: false,
   dayStartHour: 4, lastDeck: "", learningSteps: "1 10", relearningSteps: "10", graduatingInterval: 1, easyInterval: 4, startingEase: 2.5, easyBonus: 1.3, hardMultiplier: 1.2, intervalModifier: 1, lapseMultiplier: 0.5, maxInterval: 36500,
@@ -57,6 +57,15 @@ p.cardsForScope = (scope) => [...p.index.cards.values()];
 // A fresh install leaves ordinary notes alone until automatic generation is enabled.
 await vault.create("Econ/note.md", "# Micro\n\nOpportunity cost: the value of the next best alternative that is given up\n");
 cache.set("Econ/note.md", { tags: ["#econ"] });
+
+const templatePath = "xAdmin Work/Template/Weekday.md";
+await vault.create(templatePath, 'Day: <% tp.date.now("dddd") %>\n');
+cache.set(templatePath, { tags: [] });
+
+const templateExpressionPath = "Notes/Weekday.md";
+await vault.create(templateExpressionPath, 'Day: <% tp.date.now("dddd") %>\n');
+cache.set(templateExpressionPath, { tags: [] });
+
 await p.index.scanAll();
 ok("New-install default does not auto-generate cards from ordinary notes", ![...p.index.cards.values()].some((c) => c.path === "Econ/note.md"));
 
@@ -69,6 +78,13 @@ await p.index.scanAll();
 ok("Enabling automatic generation discovers eligible note cards", p.index.cards.size === 1 && [...p.index.cards.values()][0].rule === "colon");
 const auto = [...p.index.cards.values()][0];
 ok("Auto card deck = note folder; heading recorded; tags inherited", p.index.deckOf(auto) === "Econ" && auto.heading === "Micro" && p.index.tagsOf(auto).join() === "econ", p.index.deckOf(auto) + auto.heading + p.index.tagsOf(auto));
+ok("Nested Template folder is excluded when auto-generation is enabled", ![...p.index.cards.values()].some((card) => card.path === templatePath));
+ok("Unresolved Templater expressions never become cards from ordinary notes", ![...p.index.cards.values()].some((card) => card.path === templateExpressionPath));
+
+settings.excludeTemplateFolders = false;
+await p.index.updateFile(vault.getAbstractFileByPath(templatePath));
+ok("Unrendered Templater expressions stay ignored even when a template folder is explicitly included", ![...p.index.cards.values()].some((card) => card.path === templatePath));
+settings.excludeTemplateFolders = true;
 
 // create two separator cards + a cloze card
 const src = { file: "Econ/note.md", heading: "Micro", line: 2, text: "Opportunity cost: the value of the next best alternative that is given up" };
@@ -168,6 +184,8 @@ await p.index.scanAll();
 ok("autoGenerate=false: no cards from ordinary notes, official folder still indexed", ![...p.index.cards.values()].some((c) => c.path === "Econ/note.md") && [...p.index.cards.values()].some((c) => c.path.startsWith("FlashCard Book/")));
 r = await p.cards.addCards([{ front: "Works with auto off?", back: "Yes", deck: "", tags: [], rule: "manual", createdFrom: "manual" }]);
 ok("Manual creation with automatic generation off (default deck → root Cards.md)", r.ids.length === 1 && vault.files.has("FlashCard Book/Cards.md") && p.index.cards.has(r.ids[0]));
+r = await p.cards.addCards([{ front: "What is a Templater expression?", back: '<% tp.date.now("dddd") %>', deck: "Programming", tags: [], rule: "manual", createdFrom: "manual" }]);
+ok("Manual card can preserve literal Templater syntax", r.ids.length === 1 && [...p.index.cards.values()].some((card) => card.front === "What is a Templater expression?" && card.back.includes("<% tp.date.now")), JSON.stringify(r.errors));
 settings.autoGenerate = true;
 await p.index.scanAll();
 
@@ -339,6 +357,54 @@ const idxBefore = p.index.cards.size;
 const delErr = await p.cards.deleteDeckWithCards("Imported/Anki");
 ok("deleteDeckWithCards removes the deck's cards from the index and keeps other decks", delErr === null && p.index.cards.size === idxBefore - nBefore && [...p.index.cards.values()].every((c) => !c.path.startsWith("FlashCard Book/Imported/Anki/")) && [...p.index.cards.values()].some((c) => p.index.deckOf(c) === "German Practice/Part 1"), `${idxBefore} -> ${p.index.cards.size}`);
 ok("deleteDeckWithCards refuses non-folder decks and the Default deck", (await p.cards.deleteDeckWithCards("")) !== null && (await p.cards.deleteDeckWithCards("Nope/Missing")) !== null);
+
+// ── root-level cards and overlapping rescan regression ──
+const rootCardPath = "FlashCard Book/flashcard.md";
+const rootCardText = `flashcard:true
+#flashcard
+flashcard
+
+- What is the chemical symbol for gold? :: Au
+
+- What planet is known as the Red Planet? :: Mars
+
+- What is the powerhouse of the cell? :: Mitochondria
+`;
+await vault.create(rootCardPath, rootCardText);
+cache.set(rootCardPath, { tags: ["#flashcard"] });
+await p.index.updateFile(vault.getAbstractFileByPath(rootCardPath));
+const rootCards = [...p.index.cards.values()].filter((c) => c.path === rootCardPath);
+ok("Root-level files in the configured FlashCard Book folder parse spaced :: list cards into the Default deck",
+  rootCards.length === 3 && rootCards.every((c) => p.index.deckOf(c) === ""), JSON.stringify(rootCards.map((c) => [c.front, c.back, p.index.deckOf(c)])));
+
+// Hold one file read so a second rescan arrives while the first pass is active.
+const originalCachedRead = vault.cachedRead.bind(vault);
+let rootReads = 0;
+let releaseFirstRead;
+let signalFirstRead;
+const firstReadStarted = new Promise((resolve) => { signalFirstRead = resolve; });
+const firstReadGate = new Promise((resolve) => { releaseFirstRead = resolve; });
+vault.cachedRead = async (file) => {
+  if (file.path === rootCardPath) {
+    rootReads++;
+    if (rootReads === 1) {
+      signalFirstRead();
+      await firstReadGate;
+    }
+  }
+  return originalCachedRead(file);
+};
+const scanOne = p.index.scanAll();
+await firstReadStarted;
+let secondScanResolved = false;
+const scanTwo = p.index.scanAll().then(() => { secondScanResolved = true; });
+await Promise.resolve();
+ok("A rescan command does not resolve early while another scan is in progress", !secondScanResolved);
+releaseFirstRead();
+await Promise.all([scanOne, scanTwo]);
+vault.cachedRead = originalCachedRead;
+ok("A rescan requested during an active scan triggers a fresh complete pass",
+  rootReads >= 2 && p.index.cards.size >= 3 && p.index.byPath.size > 0, `reads=${rootReads}, cards=${p.index.cards.size}, notes=${p.index.byPath.size}`);
 
 // performance: 50k cards index + scope + queue
 const big = new FakeVault();
