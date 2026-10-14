@@ -20,7 +20,7 @@ export interface Settings {
   scopeTag: string;
   scopeFolders: string[];
   excludeFolders: string[];
-  /** Automatically ignore notes stored under folders named Template/Templates. */
+  /** Automatically ignore notes stored under folders named Template/Templates, including nested folders. */
   excludeTemplateFolders: boolean;
   rules: Record<string, boolean>;
   maxAnswerChars: number;
