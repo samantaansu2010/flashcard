@@ -90,7 +90,7 @@ export function buildSkip(lines: string[]): Set<number> {
       continue;
     }
     // Obsidian Core Templates placeholders; do not turn unresolved dates/titles into study cards.
-    if (/\\{\\{\\s*(?:title|date|time)(?::[^{}]*)?\\s*\\}\\}/i.test(l)) {
+    if (/\{\{\s*(?:title|date|time)(?::[^{}]*)?\s*\}\}/i.test(l)) {
       skip.add(i);
       continue;
     }
