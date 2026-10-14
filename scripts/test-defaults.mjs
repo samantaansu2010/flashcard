@@ -7,6 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const settingsSource = fs.readFileSync(path.join(root, "src/settings.ts"), "utf8");
 const mainSource = fs.readFileSync(path.join(root, "src/main.ts"), "utf8");
 const indexSource = fs.readFileSync(path.join(root, "src/index.ts"), "utf8");
+const engineSource = fs.readFileSync(path.join(root, "src/extract/engine.ts"), "utf8");
 
 const defaults = settingsSource.match(/export const DEFAULT_SETTINGS: Settings = \{([\s\S]*?)\n\};/);
 assert.ok(defaults, "DEFAULT_SETTINGS must exist");
@@ -24,5 +25,9 @@ assert.match(mainSource,
 assert.match(indexSource,
   /if \(this\.isOfficial\(file\.path\)\) return true;\s*if \(s\.excludeTemplateFolders && isTemplateFolderPath\(file\.path\)\) return false;\s*if \(!s\.autoGenerate && !\(fm === true \|\| fm === "true"\)\) return false;/,
   "Manual-card folder and flashcards:true opt-in must remain available");
+assert.match(indexSource, /ignoreTemplateExpressions:\s*!official/,
+  "Automatic indexing must filter template expressions only in ordinary notes");
+assert.match(engineSource, /buildSkip\(lines, opts\.ignoreTemplateExpressions === true\)/,
+  "Manual extraction must not inherit automatic template filtering by default");
 
 console.log("Default-settings tests passed (new installs off; saved preferences and note opt-in preserved).");
