@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest a focused improvement to FlashCard
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Explain the task or friction, not just the preferred implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the user-visible outcome and a representative example.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Mention workarounds or other approaches you considered.
+    validations:
+      required: false
+  - type: dropdown
+    id: category
+    attributes:
+      label: Area
+      options:
+        - Card creation or extraction
+        - Review and scheduling
+        - Decks, tags, or search
+        - Import or export
+        - Dashboard or analytics
+        - Settings or accessibility
+        - Documentation or developer tooling
+        - Other
+    validations:
+      required: true
