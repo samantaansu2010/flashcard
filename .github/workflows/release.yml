@@ -48,7 +48,7 @@ jobs:
           echo "release_version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Publish release with plugin assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.release_version }}
           target_commitish: ${{ github.sha }}
