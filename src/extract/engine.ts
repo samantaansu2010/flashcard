@@ -15,7 +15,7 @@ export type { ExtractOptions } from "./helpers";
  */
 export function extractCards(text: string, path: string, opts: ExtractOptions, enabled: Set<string>): Card[] {
   const lines = text.split(/\r?\n/);
-  const ctx: Ctx = { path, lines, skip: buildSkip(lines), claimed: new Set(), opts, used: new Set() };
+  const ctx: Ctx = { path, lines, skip: buildSkip(lines, opts.ignoreTemplateExpressions === true), claimed: new Set(), opts, used: new Set() };
   const seen = new Set<string>();
   const ids = new Set<string>();
   const out: Card[] = [];
