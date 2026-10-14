@@ -53,20 +53,7 @@ jobs:
           tag_name: ${{ steps.version.outputs.release_version }}
           target_commitish: ${{ github.sha }}
           name: FlashCard ${{ steps.version.outputs.release_version }}
-          body: |
-            ## FlashCard
-
-            Automatic flashcards, spaced repetition, active recall, and retention analytics. Local and free.
-
-            ## Requirements
-            Obsidian 1.7.2 or newer.
-
-            ## Included files
-            - `main.js`: production plugin bundle
-            - `manifest.json`: plugin metadata
-            - `styles.css`: plugin styles
-
-            The release is published only after the test suite, production build, and version checks pass.
+          body_path: releases/${{ steps.version.outputs.release_version }}.md
           files: |
             main.js
             manifest.json
