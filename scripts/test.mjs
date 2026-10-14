@@ -21,7 +21,7 @@ const { extractCards, RULES } = await load("extract/engine");
 const { compare } = await load("compare");
 const { schedule, newState } = await load("scheduler");
 
-const opts = { maxAnswerChars: 500, lowercaseTerms: true, genericTables: true, clozeBold: false, maxTermWords: 6 };
+const opts = { maxAnswerChars: 500, lowercaseTerms: true, genericTables: true, clozeBold: false, maxTermWords: 6, ignoreTemplateExpressions: true };
 const all = new Set(RULES.map((r) => r.id));
 let failed = 0;
 const ok = (name, cond, info) => { if (!cond) { failed++; console.log("FAIL:", name, info ?? ""); } else console.log("ok  :", name); };
