@@ -184,6 +184,8 @@ await p.index.scanAll();
 ok("autoGenerate=false: no cards from ordinary notes, official folder still indexed", ![...p.index.cards.values()].some((c) => c.path === "Econ/note.md") && [...p.index.cards.values()].some((c) => c.path.startsWith("FlashCard Book/")));
 r = await p.cards.addCards([{ front: "Works with auto off?", back: "Yes", deck: "", tags: [], rule: "manual", createdFrom: "manual" }]);
 ok("Manual creation with automatic generation off (default deck → root Cards.md)", r.ids.length === 1 && vault.files.has("FlashCard Book/Cards.md") && p.index.cards.has(r.ids[0]));
+r = await p.cards.addCards([{ front: "What is a Templater expression?", back: '<% tp.date.now("dddd") %>', deck: "Programming", tags: [], rule: "manual", createdFrom: "manual" }]);
+ok("Manual card can preserve literal Templater syntax", r.ids.length === 1 && [...p.index.cards.values()].some((card) => card.front === "What is a Templater expression?" && card.back.includes("<% tp.date.now")), JSON.stringify(r.errors));
 settings.autoGenerate = true;
 await p.index.scanAll();
 
