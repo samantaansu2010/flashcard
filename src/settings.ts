@@ -20,6 +20,8 @@ export interface Settings {
   scopeTag: string;
   scopeFolders: string[];
   excludeFolders: string[];
+  /** Automatically ignore notes stored under folders named Template/Templates. */
+  excludeTemplateFolders: boolean;
   rules: Record<string, boolean>;
   maxAnswerChars: number;
   maxTermWords: number;
@@ -65,6 +67,7 @@ export const DEFAULT_SETTINGS: Settings = {
   scopeTag: "flashcards",
   scopeFolders: [],
   excludeFolders: ["Templates"],
+  excludeTemplateFolders: true,
   rules: Object.fromEntries(RULES.map((r) => [r.id, true])),
   maxAnswerChars: 600,
   maxTermWords: 6,
@@ -267,6 +270,7 @@ export class FlashCardSettingTab extends PluginSettingTab {
     /* ── Automatic generation ── */
     const a = this.group(el, "auto", "Automatic generation", "Which notes are scanned, and the extraction rules");
     this.toggle(a, "Generate cards automatically from notes", "When off, only the FlashCard Book folder and cards you create yourself (selection, section, note, import) are used. Manual generation always works.", "autoGenerate", true);
+    this.toggle(a, "Ignore template folders", "Skip ordinary notes inside any folder named Template, Templates, _template or _templates, including nested folders. Turn this off only if you intentionally want to study those files.", "excludeTemplateFolders", true);
     this.sub(a, "Source folders");
     new Setting(a)
       .setName("Which notes become flashcards")
