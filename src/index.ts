@@ -10,6 +10,11 @@ const yieldToUi = () => new Promise<void>((r) => window.setTimeout(r, 0));
 
 export interface SourceInfo { file: string; heading?: string; block?: string; line?: number; text?: string; fromMeta: boolean }
 
+/** Template files are source material, not finished study notes. Match directory segments, including nested folders. */
+function isTemplateFolderPath(filePath: string): boolean {
+  return filePath.split("/").slice(0, -1).some((segment) => /^_?templates?$/i.test(segment.trim()));
+}
+
 /**
  * In-memory index of all cards, kept in sync with the vault incrementally.
  * Cards live in Markdown (your notes, or files in the FlashCard Book folder); this index is a cache that can always be rebuilt.
@@ -39,6 +44,7 @@ export class CardIndex extends Events {
     const fm: unknown = cache?.frontmatter?.flashcards;
     if (fm === false || fm === "false") return false;
     if (this.isOfficial(file.path)) return true;
+    if (s.excludeTemplateFolders && isTemplateFolderPath(file.path)) return false;
     if (!s.autoGenerate && !(fm === true || fm === "true")) return false;
     const inFolder = (f: string) => file.path === f || file.path.startsWith(f + "/");
     if (s.excludeFolders.some(inFolder)) return false;
