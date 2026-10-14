@@ -159,7 +159,7 @@ export class CardIndex extends Events {
     if (!this.eligible(file)) { this.removePath(file.path, silent); return; }
     const text = await this.plugin.app.vault.cachedRead(file);
     const official = this.isOfficial(file.path);
-    const opts = { ...this.plugin.extractOptions(), separators: official ? this.plugin.enabledSeparators() : undefined };
+    const opts = { ...this.plugin.extractOptions(), separators: official ? this.plugin.enabledSeparators() : undefined, ignoreTemplateExpressions: !official };
     this.set(file.path, extractCards(text, file.path, opts, this.plugin.enabledRules()), stamp);
     if (!silent) this.notify();
   }
