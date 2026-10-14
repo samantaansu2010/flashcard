@@ -61,7 +61,7 @@ export function buildSkip(lines: string[]): Set<number> {
     }
   }
   let fence: string | null = null;
-  let block: string | null = null; // "$" or "%%"
+  let block: string | null = null; // "$$" or "%%"
   let templaterBlock = false;
   for (; i < lines.length; i++) {
     const l = lines[i];
@@ -94,7 +94,7 @@ export function buildSkip(lines: string[]): Set<number> {
       skip.add(i);
       continue;
     }
-    for (const marker of ["$", "%%"]) {
+    for (const marker of ["$$", "%%"]) {
       if (t.startsWith(marker)) {
         skip.add(i);
         if (t.indexOf(marker, 2) === -1) block = marker;
