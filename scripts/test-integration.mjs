@@ -358,6 +358,54 @@ const delErr = await p.cards.deleteDeckWithCards("Imported/Anki");
 ok("deleteDeckWithCards removes the deck's cards from the index and keeps other decks", delErr === null && p.index.cards.size === idxBefore - nBefore && [...p.index.cards.values()].every((c) => !c.path.startsWith("FlashCard Book/Imported/Anki/")) && [...p.index.cards.values()].some((c) => p.index.deckOf(c) === "German Practice/Part 1"), `${idxBefore} -> ${p.index.cards.size}`);
 ok("deleteDeckWithCards refuses non-folder decks and the Default deck", (await p.cards.deleteDeckWithCards("")) !== null && (await p.cards.deleteDeckWithCards("Nope/Missing")) !== null);
 
+// ── root-level cards and overlapping rescan regression ──
+const rootCardPath = "FlashCard Book/flashcard.md";
+const rootCardText = `flashcard:true
+#flashcard
+flashcard
+
+- What is the chemical symbol for gold? :: Au
+
+- What planet is known as the Red Planet? :: Mars
+
+- What is the powerhouse of the cell? :: Mitochondria
+`;
+await vault.create(rootCardPath, rootCardText);
+cache.set(rootCardPath, { tags: ["#flashcard"] });
+await p.index.updateFile(vault.getAbstractFileByPath(rootCardPath));
+const rootCards = [...p.index.cards.values()].filter((c) => c.path === rootCardPath);
+ok("Root-level files in the configured FlashCard Book folder parse spaced :: list cards into the Default deck",
+  rootCards.length === 3 && rootCards.every((c) => p.index.deckOf(c) === ""), JSON.stringify(rootCards.map((c) => [c.front, c.back, p.index.deckOf(c)])));
+
+// Hold one file read so a second rescan arrives while the first pass is active.
+const originalCachedRead = vault.cachedRead.bind(vault);
+let rootReads = 0;
+let releaseFirstRead;
+let signalFirstRead;
+const firstReadStarted = new Promise((resolve) => { signalFirstRead = resolve; });
+const firstReadGate = new Promise((resolve) => { releaseFirstRead = resolve; });
+vault.cachedRead = async (file) => {
+  if (file.path === rootCardPath) {
+    rootReads++;
+    if (rootReads === 1) {
+      signalFirstRead();
+      await firstReadGate;
+    }
+  }
+  return originalCachedRead(file);
+};
+const scanOne = p.index.scanAll();
+await firstReadStarted;
+let secondScanResolved = false;
+const scanTwo = p.index.scanAll().then(() => { secondScanResolved = true; });
+await Promise.resolve();
+ok("A rescan command does not resolve early while another scan is in progress", !secondScanResolved);
+releaseFirstRead();
+await Promise.all([scanOne, scanTwo]);
+vault.cachedRead = originalCachedRead;
+ok("A rescan requested during an active scan triggers a fresh complete pass",
+  rootReads >= 2 && p.index.cards.size >= 3 && p.index.byPath.size > 0, `reads=${rootReads}, cards=${p.index.cards.size}, notes=${p.index.byPath.size}`);
+
 // performance: 50k cards index + scope + queue
 const big = new FakeVault();
 const pb = { ...p, app: { ...p.app, vault: big }, store: new Store(sanitizeData({}).data, () => {}) };
