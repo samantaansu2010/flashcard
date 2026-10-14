@@ -62,6 +62,13 @@ ok("Rule8 generic table", c.length === 2 && c[0].back === "Paris" && /Capital\?/
 c = cards("The {{c1::mitochondria}} is the {{c2::powerhouse}} of the cell.\n\nWater boils at ==100 degrees Celsius== at sea level.");
 ok("Cloze", c.length === 3 && c.some((x) => x.front.includes("[…]") && x.expected === "mitochondria"), JSON.stringify(c.map(x=>x.front)));
 
+c = cards('Day: <% tp.date.now("dddd") %>');
+ok("Skips unresolved inline Templater expressions", c.length === 0, JSON.stringify(c));
+c = cards('<%*\nQuestion: What is the weekday?\nAnswer: <% tp.date.now("dddd") %>\n%>');
+ok("Skips the contents of multiline Templater blocks", c.length === 0, JSON.stringify(c));
+c = cards("The date is {{date:YYYY-MM-DD}} and the title is {{title}}.");
+ok("Skips unresolved Obsidian core template placeholders", c.length === 0, JSON.stringify(c));
+
 c = cards("---\ntitle: x\nQ: fm\nA: fm\n---\n```\nQ. code\nA. code\n```\nThis is a plain sentence about nothing.\nTerm: ok\n");
 ok("Skips frontmatter/code/noise", c.length === 0, JSON.stringify(c));
 
