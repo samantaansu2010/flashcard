@@ -1,4 +1,5 @@
-import { classify, CountState } from "./deckstats";
+import { classify } from "./deckstats";
+import type { CountState } from "./deckstats";
 
 export interface SourceNoteInput {
   sourcePath: string;
