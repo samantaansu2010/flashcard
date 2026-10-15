@@ -93,7 +93,7 @@ export async function run({ load, ok }) {
   ok("Deck labels are unique within a parent", new Set(tree.filter((d) => d.depth === 1 && d.path.startsWith("00 Encyclopedia/")).map((d) => d.label)).size === 2);
   const ten = new Map(Array.from({ length: 12 }, (_, i) => [`Deck ${i + 1}`, g(1, 1)]));
   ok("Numeric ordering: Deck 2 before Deck 10", stats.buildDeckTree(ten).map((d) => d.path).slice(0, 3).join() === "Deck 1,Deck 2,Deck 3");
-  ok("Empty input gives no rows", ds.buildDeckCounts([], [], now).length === 0);
+  ok("Empty input gives no rows", stats.buildDeckTree(new Map()).length === 0);
 
   /* ── decks home: New / Learn / Due tree ── */
   const ds = await load("deckstats");
