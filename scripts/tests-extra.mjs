@@ -11,11 +11,37 @@ export async function run({ load, ok, root }) {
   const cloze = await load("cloze");
   const stats = await load("stats");
   const ex = await load("exchange");
+  const sourceNotes = await load("source-notes");
   const csv = await load("csv");
   const { importApkg } = await load("anki");
   const { compare } = await load("compare");
   const opts = { maxAnswerChars: 500, lowercaseTerms: true, genericTables: true, clozeBold: false, maxTermWords: 6 };
   const all = new Set(RULES.map((r) => r.id));
+
+  /* ── source-note practice picker ── */
+  const nowNotes = 1_000_000;
+  const noteEntries = sourceNotes.buildSourceNoteEntries([
+    { sourcePath: "Practice/Microeconomics.md" },
+    { sourcePath: "Practice/Microeconomics.md", state: { phase: 2, due: nowNotes - 1, suspended: false } },
+    { sourcePath: "Practice/Organic Chemistry.md" },
+    { sourcePath: "Practice/Nuclear Physics.md", state: { phase: 1, due: nowNotes, suspended: false } },
+    { sourcePath: "FlashCard Book/Economics/Cards.md" },
+    { sourcePath: "Practice/Deleted note.md" },
+    { sourcePath: "" },
+  ], (path) => ["Practice/Microeconomics.md", "Practice/Organic Chemistry.md", "Practice/Nuclear Physics.md"].includes(path),
+     (path) => path.startsWith("FlashCard Book/"), nowNotes);
+  ok("Source-note picker groups cards by full note path, not just folder",
+    noteEntries.length === 3 && noteEntries.find((n) => n.path === "Practice/Microeconomics.md")?.cards === 2 &&
+    noteEntries.find((n) => n.path === "Practice/Organic Chemistry.md")?.cards === 1,
+    JSON.stringify(noteEntries));
+  const microNotes = noteEntries.find((n) => n.path === "Practice/Microeconomics.md");
+  ok("Source-note picker counts New and Due independently for one note",
+    microNotes?.fresh === 1 && microNotes.due === 1);
+  ok("Source-note picker excludes internal card files and missing source notes",
+    !noteEntries.some((n) => n.path.startsWith("FlashCard Book/") || n.path.includes("Deleted")));
+  ok("Source-note picker provides predictable alphabetical order",
+    noteEntries.map((n) => n.title).join("|") === "Microeconomics|Nuclear Physics|Organic Chemistry",
+    noteEntries.map((n) => n.title).join("|"));
 
   /* ── separator validation ── */
   for (const bad of ["A", "1", "abc", "hello", ".", " ", "", "a b", "-", "*", "```", ">", "{{", "ab#", "== "])
