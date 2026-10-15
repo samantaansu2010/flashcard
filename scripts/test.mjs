@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from "url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, ".test-build");
 fs.rmSync(out, { recursive: true, force: true });
-const files = ["util", "types", "compare", "scheduler", "separators", "data", "dupes", "stats", "cloze", "csv", "exchange", "zip", "zstd", "sqlite", "anki", "deckstats", "hidden", "keys", "menuplan", "source", "extract/helpers", "extract/sections", "extract/rules", "extract/engine"];
+const files = ["util", "types", "compare", "scheduler", "separators", "data", "dupes", "stats", "cloze", "csv", "exchange", "zip", "zstd", "sqlite", "anki", "deckstats", "source-notes", "hidden", "keys", "menuplan", "source", "extract/helpers", "extract/sections", "extract/rules", "extract/engine"];
 for (const f of files) {
   const src = fs.readFileSync(path.join(root, "src", f + ".ts"), "utf8");
   const js = ts.transpileModule(src, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 } }).outputText

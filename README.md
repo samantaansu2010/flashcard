@@ -20,14 +20,14 @@ You write normal Markdown. When you enable automatic generation, FlashCard can r
 
 
 
-* Decks screen redesigned: a thin top bar (Browse / Dashboard / Settings), two big Due/New tiles, a quick-add box (`Question :: Answer`, press Enter), and plain one-line deck rows — detailed stats (retention, streak, consistency) moved to the dashboard instead of being duplicated here
+* Decks screen redesigned: a thin top bar (Browse / Practice note… / Dashboard / Settings), two big Due/New tiles, a quick-add box (`Question :: Answer`, press Enter), and plain one-line deck rows — detailed stats (retention, streak, consistency) moved to the dashboard instead of being duplicated here
 * First-run onboarding panel with two concrete ways to create your first card; dismissable, never shown again once you have cards
 * Settings page has a search box at the top that filters every setting by name/description, across all collapsed sections
 * Review screen: Skip is now a small text link under the grade buttons instead of a full-width button, so it can't be mistaken for a grade
 
 
 
-* **Decks screen** (ribbon icon): every deck as a collapsible tree with New / Learn / Due, click-to-practise, a ⚙ menu (practice, custom study, analysis, browse, add sub-deck, rename, import into, export, delete) and a small consistency / retention summary
+* **Decks screen** (ribbon icon): every folder-based deck as a collapsible tree with New / Learn / Due, click-to-practise, a ⚙ menu (practice, custom study, analysis, browse, add sub-deck, rename, import into, export, delete), plus **Practice note…** to search and review just one source note even when many notes share the same folder
 * **Anki import fixed**: modern `.apkg` files (compressed `collection.anki21b`) now import; previously the placeholder collection was read. Includes a built-in zstd decoder; large imports are fast and the file is read as soon as it is chosen
 
 
@@ -59,7 +59,7 @@ Cards you create live in real Markdown files under `FlashCard/` (configurable); 
 
 
 * Decks and nested decks, tags (own + inherited), card browser with a per-card menu (edit, open source, regenerate, move, tag, suspend, reset, delete with confirmation)
-* Review modes: due, new, learning, weak, missed, random, cram (cram never changes scheduling) — with limits; section / note / deck / tag scopes; configurable keys; skip ≠ Again
+* Review modes: due, new, learning, weak, missed, random, cram (cram never changes scheduling) — with limits; section / note / deck / tag scopes; use **Practice note…** on the Decks screen to select one source note by name; configurable keys; skip ≠ Again
 * Dashboard: time ranges (presets, custom DD/MM/YYYY, hourly → yearly), reviews / study time / accuracy / created / upcoming charts, heat map, deck and tag performance, weakest/strongest cards, clickable filters, CSV/JSON analytics export
 * Import: Anki `.apkg` (older collection format) incl. scheduling, history, media; Anki text, CSV/TSV, CrowdAnki JSON, FlashCard JSON, Markdown/text. Export: FlashCard JSON (full backup), CSV, Markdown, Anki text file. Every import ends with a report.
 * Built-in, searchable **User Guide** (command *Open user guide*)
