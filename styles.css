@@ -353,6 +353,24 @@
 .fcb-ring-text { fill: var(--text-normal); font-size: 11px; font-weight: 600; }
 .fcb-studied { text-align: center; color: var(--text-muted); margin: 8px 0 4px; }
 .fcb-decks-actions { justify-content: center; margin-top: 8px; }
+
+/* ───── Decks home: practise a single source note ───── */
+.fcb-source-notes-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 14px; margin-bottom: 10px; }
+.fcb-source-notes-head h3 { margin: 0 0 4px; font-size: var(--font-ui-medium); font-weight: var(--font-semibold); }
+.fcb-source-note-search { width: 100%; margin-bottom: 8px; }
+.fcb-source-note-result-count { margin: 2px 2px 8px; }
+.fcb-source-note-row { display: grid; grid-template-columns: minmax(0, 1fr) 48px 48px 48px 30px; align-items: center; gap: 6px; padding: 7px 4px; border-radius: var(--radius-s); }
+.fcb-source-note-row:not(.fcb-source-note-head-row):hover { background: var(--background-modifier-hover); }
+.fcb-source-note-head-row { color: var(--text-muted); font-size: var(--font-ui-smaller); font-weight: var(--font-semibold); border-bottom: 1px solid var(--background-modifier-border); padding-bottom: 8px; }
+.fcb-source-note-head-row > span:not(:first-child) { text-align: right; }
+.fcb-source-note-details { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.fcb-source-note-open { max-width: 100%; background: transparent; box-shadow: none; border: 0; padding: 0; color: var(--text-normal); font-size: var(--font-ui-medium); text-align: left; overflow-wrap: anywhere; cursor: pointer; }
+.fcb-source-note-open:hover { color: var(--interactive-accent); text-decoration: underline; }
+.fcb-source-note-path { max-width: 100%; overflow-wrap: anywhere; font-size: var(--font-ui-smaller); }
+.fcb-source-note-row > span { text-align: right; font-variant-numeric: tabular-nums; }
+.fcb-source-note-play { justify-self: end; color: var(--interactive-accent); }
+.fcb-source-note-more { width: 100%; margin-top: 8px; }
+
 @media (max-width: 520px) { .fcb-deck-row { grid-template-columns: minmax(0, 1fr) 40px 40px 40px 30px; } .fcb-summary-panel { grid-template-columns: 1fr; } .fcb-rings { justify-content: center; } }
 
 /* ───── Decks home: top nav, hero tiles, onboarding, quick-add (clutter reduction pass) ───── */
