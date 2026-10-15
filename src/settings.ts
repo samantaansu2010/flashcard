@@ -171,7 +171,7 @@ export class FlashCardSettingTab extends PluginSettingTab {
       const s = this.plugin.settings;
       s.separators = normalizeSeparators(s.separators);
       wrap.empty();
-      wrap.createEl("p", { cls: "setting-item-description", text: "Cards in the FlashCard Book folder (and pasted or converted text) are read as “front SEP back” lines. The separator must be surrounded by spaces. Only enabled separators are recognised; the default one is used when FlashCard Book writes cards for you." });
+      wrap.createEl("p", { cls: "setting-item-description", text: "Cards in the FlashCard Book folder, eligible notes scanned automatically, and pasted or converted text can use “front SEP back” lines. The separator must be surrounded by spaces. Only enabled separators are recognised; the default one is used when FlashCard Book writes cards for you." });
       const commit = async (redisplay = true) => { await this.save(true); if (redisplay) redraw(); };
       s.separators.forEach((d, i) => {
         const row = new Setting(wrap).setName(`${d.sep}${s.defaultSeparator === d.sep ? "  (default)" : ""}`).setDesc(`Example:  ${separatorExample(d.sep)}`);
