@@ -17,7 +17,7 @@ The production build runs TypeScript's no-emit type check before bundling. CI ru
 | Script | Focus |
 |---|---|
 | `scripts/test-defaults.mjs` | Safe defaults, saved-setting precedence, explicit note opt-in, and automatic versus manual extraction options |
-| `scripts/test.mjs` | Extraction rules, expected card output, and template-expression filtering |
+| `scripts/test.mjs` | Extraction rules, expected card output, template-expression filtering, and source-note grouping/counts for focused practice |
 | `scripts/test-zstd.mjs` | The built-in zstd decoding path used by modern Anki packages |
 | `scripts/test-integration.mjs` | Indexing, card creation, card files, source metadata, and automatic-generation behavior against a fake vault |
 | `scripts/test-tz.mjs` | Date behavior across UTC, Asia/Kolkata, DST-sensitive regions, and date-line zones |
