@@ -50,7 +50,7 @@ export const GUIDE: GuideSection[] = [
   {
     "id": "separators",
     "title": "Card Separators",
-    "body": "A card line is `front SEP back`. The separator must have **spaces around it**.\n\n    What is GDP? :: Market value of final goods.\n    Capital of France → Paris\n    Mitosis => Cell division\n    Term | Definition\n    Q # A         (off by default)\n\nBuilt-in: `::`  `→`  `=>`  `|`  `=`  `#`  `@`  `+`  `$`\n\n`::`, `→`, `=>` and `|` are on by default. `=`, `#`, `@`, `+` and `$` are off because they appear in ordinary text and maths; turn them on in **Settings → Card creation → Separators**.\n\nIf a line contains several separators, the first one splits the card, so the answer may contain separators: `Q :: A :: B` → front *Q*, back *A :: B*.\n\nA line break inside a card is written as `<br>`."
+    "body": "A card line is `front SEP back`. The separator must have **spaces around it**. When automatic generation is enabled, these separators are also recognised in ordinary notes that match your selected scope; the source note is never rewritten.\n\n    What is GDP? :: Market value of final goods.\n    Capital of France → Paris\n    Mitosis => Cell division\n    Term | Definition\n    Q # A         (off by default)\n\nBuilt-in: `::`  `→`  `=>`  `|`  `=`  `#`  `@`  `+`  `$`\n\n`::`, `→`, `=>` and `|` are on by default. `=`, `#`, `@`, `+` and `$` are off because they appear in ordinary text and maths; turn them on in **Settings → Card creation → Separators**.\n\nIf a line contains several separators, the first one splits the card, so the answer may contain separators: `Q :: A :: B` → front *Q*, back *A :: B*.\n\nA line break inside a card is written as `<br>`."
   },
   {
     "id": "custom-separators",
