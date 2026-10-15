@@ -7,6 +7,7 @@ import { ConfirmModal, PromptModal } from "../ui/common";
 import { ReviewOptionsModal } from "../ui/review-options";
 import { ExportModal } from "../ui/import-export";
 import { renderQuickAdd } from "../ui/quick-add";
+import { SourceNotePracticeModal } from "../ui/source-note-practice";
 
 export const DECKS_VIEW = "flashcard-book-decks";
 
@@ -59,6 +60,14 @@ export class DecksView extends ItemView {
     nav.createSpan({ cls: "fcb-topnav-brand", text: "FlashCard Book" });
     const navRight = nav.createDiv({ cls: "fcb-topnav-right" });
     navRight.createEl("button", { cls: "clickable-icon", attr: { "aria-label": "Browse all cards" }, text: "Browse" }).onclick = () => void p.openBrowser({});
+    navRight.createEl("button", { cls: "clickable-icon", attr: { "aria-label": "Practice cards from a specific source note", title: "Choose one note and practice only its cards" }, text: "Practice note…" }).onclick = () => {
+      const picker = new SourceNotePracticeModal(p.app, p, (note) => void p.startReview({ kind: "note", path: note.path }));
+      if (!picker.hasNotes) {
+        new Notice("FlashCard Book: no indexed source notes with cards. Rescan the vault or check automatic-generation settings.");
+        return;
+      }
+      picker.open();
+    };
     navRight.createEl("button", { cls: "clickable-icon", attr: { "aria-label": "Open dashboard" }, text: "Dashboard" }).onclick = () => void p.openDashboard();
     navRight.createEl("button", { cls: "clickable-icon", attr: { "aria-label": "Open settings" }, text: "⚙" }).onclick = () => p.openSettings();
 
