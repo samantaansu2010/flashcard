@@ -1,6 +1,7 @@
 import { App, SuggestModal, TFile } from "obsidian";
 import type FlashCardBook from "../main";
-import { buildSourceNoteEntries, SourceNoteEntry } from "../source-notes";
+import { buildSourceNoteEntries } from "../source-notes";
+import type { SourceNoteEntry } from "../source-notes";
 
 /** Searchable picker for reviewing cards originating from one ordinary Markdown note. */
 export class SourceNotePracticeModal extends SuggestModal<SourceNoteEntry> {
