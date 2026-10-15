@@ -95,6 +95,28 @@ export async function run({ load, ok }) {
   ok("Numeric ordering: Deck 2 before Deck 10", stats.buildDeckTree(ten).map((d) => d.path).slice(0, 3).join() === "Deck 1,Deck 2,Deck 3");
   ok("Empty input gives no rows", stats.buildDeckTree(new Map()).length === 0);
 
+  /* ── source-note practice list ── */
+  const sourceNotes = stats.buildSourceNoteCounts([
+    { path: "Practice/Nuclear Physics.md", state: undefined },
+    { path: "Practice/Microeconomics.md", state: st(0, now) },
+    { path: "Practice/Microeconomics.md", state: st(2, now - day) },
+    { path: "Practice/Organic Chemistry.md", state: st(1, now - 1) },
+    { path: "Computer command list.md", state: st(2, now + day) },
+    { path: "FlashCard Book/Deck/Cards.md", state: st(0, now) },
+    { path: "Practice/Microeconomics.md", state: st(0, now) },
+  ], now);
+  const micro = sourceNotes.find((n) => n.path === "Practice/Microeconomics.md");
+  ok("Source-note counts keep notes independent even when they share one folder",
+    sourceNotes.length === 5 && micro?.label === "Microeconomics" && micro.folder === "Practice" &&
+    micro.counts.total === 3 && micro.counts.new === 2 && micro.counts.due === 1,
+    JSON.stringify(sourceNotes));
+  ok("Source-note list is naturally sorted and root notes are labelled",
+    sourceNotes[0].label === "Computer command list" &&
+    sourceNotes.some((n) => n.path === "Computer command list.md" && n.folder === "Vault root"));
+  ok("Source-note counter skips non-Markdown paths and never changes deck counts",
+    !sourceNotes.some((n) => n.path === "FlashCard Book/Deck/Cards.json") &&
+    stats.buildDeckTree(new Map()).length === 0);
+
   /* ── decks home: New / Learn / Due tree ── */
   const ds = await load("deckstats");
   const now = 1_800_000_000_000, min = 60_000, day = 86_400_000;
