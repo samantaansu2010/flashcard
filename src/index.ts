@@ -41,9 +41,16 @@ export class CardIndex extends Events {
 
   isOfficial(path: string): boolean { return deckFromOfficialPath(path, this.plugin.settings.cardFolder) !== null; }
 
+  /** Internal folders under the card root (for example _exports and _media) are never source notes. */
+  private isIgnoredCardFolderPath(path: string): boolean {
+    const root = this.plugin.settings.cardFolder.replace(/\\/g, "/").replace(/^\\/+|\\/+$/g, "");
+    if (!root || !path.startsWith(root + "/")) return false;
+    return path.slice(root.length + 1).split("/").some((segment) => segment.startsWith("_"));
+  }
+
   eligible(file: TFile): boolean {
     const s = this.plugin.settings;
-    if (file.extension !== "md") return false;
+    if (file.extension !== "md" || this.isIgnoredCardFolderPath(file.path)) return false;
     const cache = this.plugin.app.metadataCache.getFileCache(file);
     const fm: unknown = cache?.frontmatter?.flashcards;
     if (fm === false || fm === "false") return false;
