@@ -27,7 +27,7 @@ You write normal Markdown. When you enable automatic generation, FlashCard can r
 
 
 
-* **Decks screen** (ribbon icon): every deck as a collapsible tree with New / Learn / Due, click-to-practise, a ⚙ menu (practice, custom study, analysis, browse, add sub-deck, rename, import into, export, delete) and a small consistency / retention summary
+* **Decks screen** (ribbon icon): folder-based decks as a collapsible tree with New / Learn / Due, plus a searchable **Practice by note** list that starts a session from one source note only (for example, Microeconomics inside a folder containing many subjects). Deck options include practice, custom study, analysis, browse, add sub-deck, rename, import, export and delete.
 * **Anki import fixed**: modern `.apkg` files (compressed `collection.anki21b`) now import; previously the placeholder collection was read. Includes a built-in zstd decoder; large imports are fast and the file is read as soon as it is chosen
 
 
