@@ -371,7 +371,7 @@
 .fcb-source-note-play { justify-self: end; color: var(--interactive-accent); }
 .fcb-source-note-more { width: 100%; margin-top: 8px; }
 
-@media (max-width: 520px) { .fcb-deck-row { grid-template-columns: minmax(0, 1fr) 40px 40px 40px 30px; } .fcb-summary-panel { grid-template-columns: 1fr; } .fcb-rings { justify-content: center; } }
+@media (max-width: 520px) { .fcb-deck-row { grid-template-columns: minmax(0, 1fr) 40px 40px 40px 30px; } .fcb-source-note-row { grid-template-columns: minmax(0, 1fr) 32px 32px 32px 26px; gap: 4px; } .fcb-summary-panel { grid-template-columns: 1fr; } .fcb-rings { justify-content: center; } }
 
 /* ───── Decks home: top nav, hero tiles, onboarding, quick-add (clutter reduction pass) ───── */
 .fcb-topnav { display: flex; align-items: center; justify-content: space-between; padding: 2px 2px 14px; margin-bottom: 4px; border-bottom: 1px solid var(--background-modifier-border); }
