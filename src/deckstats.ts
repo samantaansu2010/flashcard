@@ -71,3 +71,54 @@ export function visibleDecks(nodes: DeckNode[], collapsed: ReadonlySet<string>):
     return true;
   });
 }
+
+export interface SourceNoteCount {
+  /** Vault-relative path of the source note. */
+  path: string;
+  /** File name without the Markdown extension. */
+  label: string;
+  /** Parent folder, or "Vault root" for a top-level note. */
+  folder: string;
+  counts: DeckCount;
+}
+
+/**
+ * Counts cards by their source note, independently of the folder-based deck hierarchy.
+ * This enables a user to practise one note without changing how decks map to folders.
+ */
+export function buildSourceNoteCounts(
+  items: { path: string; state?: CountState }[],
+  now: number,
+): SourceNoteCount[] {
+  const byPath = new Map<string, { counts: DeckCount }>();
+  const bump = (counts: DeckCount, kind: ReturnType<typeof classify>): void => {
+    counts.total++;
+    if (kind === "new") counts.new++;
+    else if (kind === "learn") counts.learn++;
+    else if (kind === "due") counts.due++;
+    else if (kind === "suspended") counts.suspended++;
+  };
+
+  for (const item of items) {
+    if (!item.path || !item.path.toLowerCase().endsWith(".md")) continue;
+    let entry = byPath.get(item.path);
+    if (!entry) {
+      entry = { counts: zero() };
+      byPath.set(item.path, entry);
+    }
+    bump(entry.counts, classify(item.state, now));
+  }
+
+  return [...byPath.entries()]
+    .map(([path, entry]) => {
+      const slash = path.lastIndexOf("/");
+      const file = path.slice(slash + 1);
+      return {
+        path,
+        label: file.replace(/\.md$/i, ""),
+        folder: slash >= 0 ? path.slice(0, slash) : "Vault root",
+        counts: entry.counts,
+      };
+    })
+    .sort((a, b) => cmpSeg(a.label, b.label) || cmpSeg(a.path, b.path));
+}

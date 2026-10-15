@@ -99,6 +99,30 @@ export async function run({ load, ok }) {
   const ds = await load("deckstats");
   const now = 1_800_000_000_000, min = 60_000, day = 86_400_000;
   const st = (phase, due, extra = {}) => ({ phase, due, suspended: false, ...extra });
+
+  /* ── source-note practice list ── */
+  const noteState = (phase, due) => ({ phase, due, suspended: false });
+  const sourceNotes = ds.buildSourceNoteCounts([
+    { path: "Practice/Nuclear Physics.md", state: undefined },
+    { path: "Practice/Microeconomics.md", state: noteState(0, now) },
+    { path: "Practice/Microeconomics.md", state: noteState(2, now - day) },
+    { path: "Practice/Organic Chemistry.md", state: noteState(1, now - 1) },
+    { path: "Computer command list.md", state: noteState(2, now + day) },
+    { path: "Practice/Microeconomics.md", state: st(0, now) },
+    { path: "Practice/notes.csv", state: st(0, now) },
+  ], now);
+  const micro = sourceNotes.find((n) => n.path === "Practice/Microeconomics.md");
+  ok("Source-note counts keep notes independent even when they share one folder",
+    sourceNotes.length === 4 && micro?.label === "Microeconomics" && micro.folder === "Practice" &&
+    micro.counts.total === 3 && micro.counts.new === 2 && micro.counts.due === 1,
+    JSON.stringify(sourceNotes));
+  ok("Source-note list is naturally sorted and root notes are labelled",
+    sourceNotes[0].label === "Computer command list" &&
+    sourceNotes.some((n) => n.path === "Computer command list.md" && n.folder === "Vault root"));
+  ok("Source-note counter skips non-Markdown paths and never changes deck counts",
+    !sourceNotes.some((n) => n.path === "Practice/notes.csv") &&
+    ds.buildDeckCounts([], [], now).length === 0);
+
   const items = [
     { deck: "German/Vocab", state: undefined }, { deck: "German/Vocab", state: st(0, 0) }, { deck: "German/Vocab", state: st(1, now + 5 * min) },
     { deck: "German/Vocab", state: st(1, now + 60 * min) }, { deck: "German/Vocab", state: st(2, now - day) }, { deck: "German/Vocab", state: st(2, now + day) },
