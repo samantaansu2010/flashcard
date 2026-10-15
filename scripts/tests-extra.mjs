@@ -203,7 +203,7 @@ export async function run({ load, ok, root }) {
     ex.htmlToMarkdown("value &#x110000; and &#999999999999;") === "value &#x110000; and &#999999999999;");
   const malformedMarkup = ex.htmlToMarkdown("<scr<script>ipt>alert(1)</scr<script>ipt>");
   ok("Malformed overlapping tag fragments cannot survive as active HTML",
-    !/<\\s*script\\b|<\\s*img\\b/i.test(malformedMarkup), malformedMarkup);
+    !/<\s*script\b|<\s*img\b/i.test(malformedMarkup), malformedMarkup);
   ok("Media import rejects path traversal and encoded separators",
     ex.htmlToMarkdown("<img src=\"%2e%2e%2fsecret.png\">") === "");
 
