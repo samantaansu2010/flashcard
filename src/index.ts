@@ -43,7 +43,7 @@ export class CardIndex extends Events {
 
   /** Internal folders under the card root (for example _exports and _media) are never source notes. */
   private isIgnoredCardFolderPath(path: string): boolean {
-    const root = this.plugin.settings.cardFolder.replace(/\\/g, "/").replace(/^\\/+|\\/+$/g, "");
+    const root = this.plugin.settings.cardFolder.split("\\").join("/").split("/").filter(Boolean).join("/");
     if (!root || !path.startsWith(root + "/")) return false;
     return path.slice(root.length + 1).split("/").some((segment) => segment.startsWith("_"));
   }
