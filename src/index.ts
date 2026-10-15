@@ -163,7 +163,9 @@ export class CardIndex extends Events {
     if (!this.eligible(file)) { this.removePath(file.path, silent); return; }
     const text = await this.plugin.app.vault.cachedRead(file);
     const official = this.isOfficial(file.path);
-    const opts = { ...this.plugin.extractOptions(), separators: official ? this.plugin.enabledSeparators() : undefined, ignoreTemplateExpressions: !official };
+    // Only eligible files reach this point. Separator syntax is explicit, so honour the
+    // configured separators in tagged/folder-scoped ordinary notes as well as official card files.
+    const opts = { ...this.plugin.extractOptions(), separators: this.plugin.enabledSeparators(), ignoreTemplateExpressions: !official };
     this.set(file.path, extractCards(text, file.path, opts, this.plugin.enabledRules()), stamp);
     if (!silent) this.notify();
   }
