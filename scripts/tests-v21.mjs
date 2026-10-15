@@ -95,6 +95,11 @@ export async function run({ load, ok }) {
   ok("Numeric ordering: Deck 2 before Deck 10", stats.buildDeckTree(ten).map((d) => d.path).slice(0, 3).join() === "Deck 1,Deck 2,Deck 3");
   ok("Empty input gives no rows", stats.buildDeckTree(new Map()).length === 0);
 
+  /* ── decks home: New / Learn / Due tree ── */
+  const ds = await load("deckstats");
+  const now = 1_800_000_000_000, min = 60_000, day = 86_400_000;
+  const st = (phase, due, extra = {}) => ({ phase, due, suspended: false, ...extra });
+
   /* ── source-note practice list ── */
   const noteState = (phase, due) => ({ phase, due, suspended: false });
   const sourceNotes = stats.buildSourceNoteCounts([
@@ -118,10 +123,6 @@ export async function run({ load, ok }) {
     !sourceNotes.some((n) => n.path === "FlashCard Book/Deck/Cards.json") &&
     stats.buildDeckTree(new Map()).length === 0);
 
-  /* ── decks home: New / Learn / Due tree ── */
-  const ds = await load("deckstats");
-  const now = 1_800_000_000_000, min = 60_000, day = 86_400_000;
-  const st = (phase, due, extra = {}) => ({ phase, due, suspended: false, ...extra });
   const items = [
     { deck: "German/Vocab", state: undefined }, { deck: "German/Vocab", state: st(0, 0) }, { deck: "German/Vocab", state: st(1, now + 5 * min) },
     { deck: "German/Vocab", state: st(1, now + 60 * min) }, { deck: "German/Vocab", state: st(2, now - day) }, { deck: "German/Vocab", state: st(2, now + day) },
