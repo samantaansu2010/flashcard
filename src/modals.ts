@@ -12,8 +12,8 @@ export class PreviewModal extends Modal {
     el.addClass("fcb-preview");
     el.createEl("h2", { text: `Cards in “${this.file.basename}”` });
     const text = await this.app.vault.read(this.file);
-    const official = this.plugin.index.isOfficial(this.file.path);
-    const cards = extractCards(text, this.file.path, { ...this.plugin.extractOptions(), separators: official ? this.plugin.enabledSeparators() : undefined }, this.plugin.enabledRules());
+    // Preview is an explicit user action, so show separator cards in ordinary notes too.
+    const cards = extractCards(text, this.file.path, { ...this.plugin.extractOptions(), separators: this.plugin.enabledSeparators() }, this.plugin.enabledRules());
     if (!cards.length) {
       el.createEl("p", { text: "No cards found. Try a Question:/Answer: pair, a heading with a paragraph beneath it, or “Term: definition” lines." });
       return;
