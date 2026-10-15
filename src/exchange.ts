@@ -43,7 +43,7 @@ function decodeHtmlEntities(text: string): string {
 
 /** Escape text that could otherwise become a second round of raw HTML when Markdown is rendered. */
 function safeHtmlText(text: string): string {
-  return text.replace(/</g, "&lt;");
+  return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 /** Anki media references are filenames, not arbitrary paths or URLs. */
