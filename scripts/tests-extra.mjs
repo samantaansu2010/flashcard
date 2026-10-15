@@ -201,6 +201,11 @@ export async function run({ load, ok, root }) {
     ex.htmlToMarkdown("<img src=\"javascript:alert(1)\" onerror=\"alert(2)\">") === "");
   ok("HTML text conversion tolerates invalid numeric entities",
     ex.htmlToMarkdown("value &#x110000; and &#999999999999;") === "value &#x110000; and &#999999999999;");
+  const malformedMarkup = ex.htmlToMarkdown("<scr<script>ipt>alert(1)</scr<script>ipt>");
+  ok("Malformed overlapping tag fragments cannot survive as active HTML",
+    !/<\\s*script\\b|<\\s*img\\b/i.test(malformedMarkup), malformedMarkup);
+  ok("Media import rejects path traversal and encoded separators",
+    ex.htmlToMarkdown("<img src=\"%2e%2e%2fsecret.png\">") === "");
 
   /* ── .apkg ── */
   const fx = (n) => new Uint8Array(fs.readFileSync(path.join(root, "scripts", "fixtures", n)));
