@@ -108,19 +108,19 @@ export async function run({ load, ok }) {
     { path: "Practice/Microeconomics.md", state: noteState(2, now - day) },
     { path: "Practice/Organic Chemistry.md", state: noteState(1, now - 1) },
     { path: "Computer command list.md", state: noteState(2, now + day) },
-    { path: "FlashCard Book/Deck/Cards.md", state: st(0, now) },
     { path: "Practice/Microeconomics.md", state: st(0, now) },
+    { path: "Practice/notes.csv", state: st(0, now) },
   ], now);
   const micro = sourceNotes.find((n) => n.path === "Practice/Microeconomics.md");
   ok("Source-note counts keep notes independent even when they share one folder",
-    sourceNotes.length === 5 && micro?.label === "Microeconomics" && micro.folder === "Practice" &&
+    sourceNotes.length === 4 && micro?.label === "Microeconomics" && micro.folder === "Practice" &&
     micro.counts.total === 3 && micro.counts.new === 2 && micro.counts.due === 1,
     JSON.stringify(sourceNotes));
   ok("Source-note list is naturally sorted and root notes are labelled",
     sourceNotes[0].label === "Computer command list" &&
     sourceNotes.some((n) => n.path === "Computer command list.md" && n.folder === "Vault root"));
   ok("Source-note counter skips non-Markdown paths and never changes deck counts",
-    !sourceNotes.some((n) => n.path === "FlashCard Book/Deck/Cards.json") &&
+    !sourceNotes.some((n) => n.path === "Practice/notes.csv") &&
     stats.buildDeckTree(new Map()).length === 0);
 
   const items = [
