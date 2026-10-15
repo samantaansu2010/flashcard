@@ -188,7 +188,24 @@ export async function run({ load, ok, root }) {
   const anki = ex.exportAnkiText(sample);
   ok("Anki text export: headers, Basic + Cloze, deck with ::, tags", anki.startsWith("#separator:tab") && anki.includes("Basic\tEcon") && anki.includes("Cloze\tDefault") && anki.split("\n").filter((l) => l.startsWith("Cloze")).length === 1 && /<b>GDP<\/b>/.test(anki), anki);
   ok("Anki text export re-imports", ex.importCsv(anki).cards.length === 2);
-  ok("htmlToMarkdown", ex.htmlToMarkdown("<div>a<br>b &lt;x&gt; <b>bold</b> <img src=\"p%20q.png\"></div>", []) === "a\nb <x> **bold** ![[p q.png]]");
+  ok("htmlToMarkdown safely converts formatting, entities, and media", ex.htmlToMarkdown("<div>a<br>b &lt;x&gt; <b>bold</b> <img src=\"p%20q.png\"></div>", []) === "a\nb &lt;x&gt; **bold** ![[p q.png]]");
+
+  const maliciousMedia = [];
+  ok("HTML conversion escapes entity-encoded tags instead of re-emitting active HTML",
+    ex.htmlToMarkdown("&lt;img src=x onerror=alert(1)&gt;") === "&lt;img src=x onerror=alert(1)&gt;");
+  ok("HTML conversion removes script and style elements including their contents",
+    ex.htmlToMarkdown("<div>before<script>alert(1)</script><style>body{color:red}</style>after</div>") === "beforeafter");
+  ok("HTML image import keeps src but drops event-handler attributes",
+    ex.htmlToMarkdown("<img src=\"p%20q.png\" onerror=\"alert(1)\">", maliciousMedia) === "![[p q.png]]" && maliciousMedia.join() === "p q.png");
+  ok("HTML image import rejects javascript URLs",
+    ex.htmlToMarkdown("<img src=\"javascript:alert(1)\" onerror=\"alert(2)\">") === "");
+  ok("HTML text conversion tolerates invalid numeric entities",
+    ex.htmlToMarkdown("value &#x110000; and &#999999999999;") === "value &#x110000; and &#999999999999;");
+  const malformedMarkup = ex.htmlToMarkdown("<scr<script>ipt>alert(1)</scr<script>ipt>");
+  ok("Malformed overlapping tag fragments cannot survive as active HTML",
+    !/<\s*script\b|<\s*img\b/i.test(malformedMarkup), malformedMarkup);
+  ok("Media import rejects path traversal and encoded separators",
+    ex.htmlToMarkdown("<img src=\"%2e%2e%2fsecret.png\">") === "");
 
   /* ── .apkg ── */
   const fx = (n) => new Uint8Array(fs.readFileSync(path.join(root, "scripts", "fixtures", n)));
