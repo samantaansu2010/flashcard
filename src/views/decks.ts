@@ -1,6 +1,6 @@
 import { ItemView, Menu, Notice, WorkspaceLeaf } from "obsidian";
 import type FlashCardBook from "../main";
-import { buildDeckCounts, DeckNode, visibleDecks } from "../deckstats";
+import { buildDeckCounts, buildSourceNoteCounts, DeckNode, visibleDecks } from "../deckstats";
 import { computeAnalytics } from "../analytics";
 import { deckLabel, normalizeDeck } from "../data";
 import { ConfirmModal, PromptModal } from "../ui/common";
@@ -17,6 +17,8 @@ export const DECKS_VIEW = "flashcard-book-decks";
  */
 export class DecksView extends ItemView {
   private timer: number | null = null;
+  private noteSearch = "";
+  private noteLimit = 30;
   constructor(leaf: WorkspaceLeaf, private plugin: FlashCardBook) { super(leaf); }
   getViewType(): string { return DECKS_VIEW; }
   getDisplayText(): string { return "Flashcard decks"; }
@@ -127,6 +129,69 @@ export class DecksView extends ItemView {
     }
     const addRow = panel.createDiv({ cls: "fcb-add-deck-row" });
     addRow.createEl("button", { cls: "fcb-add-deck-btn", text: "+ New deck" }).onclick = () => this.createDeck("");
+
+    /* source-note practice: a folder can contain many independent topics, so let users
+       start a session from one note without changing the folder-based deck hierarchy. */
+    const sourceNoteItems: { path: string; state: ReturnType<typeof p.store.get> }[] = [];
+    for (const c of p.index.cards.values()) {
+      const sourcePath = p.index.sourceOf(c).file;
+      if (!sourcePath || p.index.isOfficial(sourcePath)) continue;
+      sourceNoteItems.push({ path: sourcePath, state: p.store.get(c.id) });
+    }
+    const sourceNotes = buildSourceNoteCounts(sourceNoteItems, now);
+    if (sourceNotes.length) {
+      const notePanel = root.createDiv({ cls: "fcb-panel fcb-source-notes" });
+      const noteHead = notePanel.createDiv({ cls: "fcb-source-notes-head" });
+      const noteTitle = noteHead.createDiv();
+      noteTitle.createEl("h3", { text: "Practice by note" });
+      noteTitle.createDiv({ cls: "fcb-note", text: "Choose one source note to practise only its cards." });
+      noteHead.createSpan({ cls: "fcb-note", text: `${sourceNotes.length} source note${sourceNotes.length === 1 ? "" : "s"}` });
+      const search = notePanel.createEl("input", { cls: "fcb-bulk-input fcb-source-note-search", attr: { type: "search", placeholder: "Find a note, e.g. Microeconomics", "aria-label": "Search source notes to practise" } });
+      search.value = this.noteSearch;
+      const noteList = notePanel.createDiv({ cls: "fcb-source-note-list" });
+      const renderSourceNotes = (): void => {
+        noteList.empty();
+        const query = this.noteSearch.trim().toLocaleLowerCase();
+        const matches = sourceNotes.filter((n) => !query || n.label.toLocaleLowerCase().includes(query) || n.path.toLocaleLowerCase().includes(query));
+        const result = noteList.createDiv({ cls: "fcb-note fcb-source-note-result-count", text: query ? `${matches.length} matching note${matches.length === 1 ? "" : "s"}` : "Select a note below to review it separately." });
+        result.setAttr("aria-live", "polite");
+        if (!matches.length) {
+          noteList.createDiv({ cls: "fcb-chart-empty", text: "No source notes match that search." });
+          return;
+        }
+        const head = noteList.createDiv({ cls: "fcb-source-note-row fcb-source-note-head-row" });
+        head.createSpan({ text: "Note" });
+        head.createSpan({ text: "New" });
+        head.createSpan({ text: "Learn" });
+        head.createSpan({ text: "Due" });
+        head.createSpan();
+        for (const n of matches.slice(0, this.noteLimit)) {
+          const row = noteList.createDiv({ cls: "fcb-source-note-row" });
+          const details = row.createDiv({ cls: "fcb-source-note-details" });
+          const open = details.createEl("button", { cls: "fcb-source-note-open", text: n.label, attr: { title: `Practise only cards from ${n.path}`, "aria-label": `Practise note ${n.label}` } });
+          open.onclick = () => void p.startReview({ kind: "note", path: n.path });
+          details.createDiv({ cls: "fcb-note fcb-source-note-path", text: n.folder });
+          this.count(row, "fcb-num-new", n.counts.new, `${n.counts.new} new cards from this note`);
+          this.count(row, "fcb-num-learn", n.counts.learn, `${n.counts.learn} learning cards from this note`);
+          this.count(row, "fcb-num-due", n.counts.due, `${n.counts.due} due cards from this note`);
+          const play = row.createEl("button", { cls: "clickable-icon fcb-source-note-play", text: "▶", attr: { title: "Practise only this note", "aria-label": `Start review for ${n.label}` } });
+          play.onclick = () => void p.startReview({ kind: "note", path: n.path });
+        }
+        if (matches.length > this.noteLimit) {
+          const more = noteList.createEl("button", { cls: "fcb-source-note-more", text: `Show ${Math.min(30, matches.length - this.noteLimit)} more notes` });
+          more.onclick = () => {
+            this.noteLimit += 30;
+            renderSourceNotes();
+          };
+        }
+      };
+      search.oninput = () => {
+        this.noteSearch = search.value;
+        this.noteLimit = 30;
+        renderSourceNotes();
+      };
+      renderSourceNotes();
+    }
 
     /* one quiet line, not a dashboard */
     if (hasAnyCards) {
