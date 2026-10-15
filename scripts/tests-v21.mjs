@@ -121,7 +121,7 @@ export async function run({ load, ok }) {
     sourceNotes.some((n) => n.path === "Computer command list.md" && n.folder === "Vault root"));
   ok("Source-note counter skips non-Markdown paths and never changes deck counts",
     !sourceNotes.some((n) => n.path === "Practice/notes.csv") &&
-    stats.buildDeckTree(new Map()).length === 0);
+    ds.buildDeckCounts([], [], now).length === 0);
 
   const items = [
     { deck: "German/Vocab", state: undefined }, { deck: "German/Vocab", state: st(0, 0) }, { deck: "German/Vocab", state: st(1, now + 5 * min) },
