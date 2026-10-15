@@ -1,4 +1,4 @@
-import { ItemView, Menu, Notice, WorkspaceLeaf } from "obsidian";
+import { ItemView, Menu, Notice, TFile, WorkspaceLeaf } from "obsidian";
 import type FlashCardBook from "../main";
 import { buildDeckCounts, buildSourceNoteCounts, DeckNode, visibleDecks } from "../deckstats";
 import { computeAnalytics } from "../analytics";
@@ -135,7 +135,8 @@ export class DecksView extends ItemView {
     const sourceNoteItems: { path: string; state: ReturnType<typeof p.store.get> }[] = [];
     for (const c of p.index.cards.values()) {
       const sourcePath = p.index.sourceOf(c).file;
-      if (!sourcePath || p.index.isOfficial(sourcePath)) continue;
+      const sourceFile = sourcePath ? p.app.vault.getAbstractFileByPath(sourcePath) : null;
+      if (!(sourceFile instanceof TFile) || p.index.isOfficial(sourcePath)) continue;
       sourceNoteItems.push({ path: sourcePath, state: p.store.get(c.id) });
     }
     const sourceNotes = buildSourceNoteCounts(sourceNoteItems, now);
@@ -170,7 +171,7 @@ export class DecksView extends ItemView {
           const details = row.createDiv({ cls: "fcb-source-note-details" });
           const open = details.createEl("button", { cls: "fcb-source-note-open", text: n.label, attr: { title: `Practise only cards from ${n.path}`, "aria-label": `Practise note ${n.label}` } });
           open.onclick = () => void p.startReview({ kind: "note", path: n.path });
-          details.createDiv({ cls: "fcb-note fcb-source-note-path", text: n.folder });
+          details.createDiv({ cls: "fcb-note fcb-source-note-path", text: `${n.folder} · ${n.counts.total} card${n.counts.total === 1 ? "" : "s"}` });
           this.count(row, "fcb-num-new", n.counts.new, `${n.counts.new} new cards from this note`);
           this.count(row, "fcb-num-learn", n.counts.learn, `${n.counts.learn} learning cards from this note`);
           this.count(row, "fcb-num-due", n.counts.due, `${n.counts.due} due cards from this note`);
