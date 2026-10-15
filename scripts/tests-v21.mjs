@@ -96,12 +96,13 @@ export async function run({ load, ok }) {
   ok("Empty input gives no rows", stats.buildDeckTree(new Map()).length === 0);
 
   /* ── source-note practice list ── */
+  const noteState = (phase, due) => ({ phase, due, suspended: false });
   const sourceNotes = stats.buildSourceNoteCounts([
     { path: "Practice/Nuclear Physics.md", state: undefined },
-    { path: "Practice/Microeconomics.md", state: st(0, now) },
-    { path: "Practice/Microeconomics.md", state: st(2, now - day) },
-    { path: "Practice/Organic Chemistry.md", state: st(1, now - 1) },
-    { path: "Computer command list.md", state: st(2, now + day) },
+    { path: "Practice/Microeconomics.md", state: noteState(0, now) },
+    { path: "Practice/Microeconomics.md", state: noteState(2, now - day) },
+    { path: "Practice/Organic Chemistry.md", state: noteState(1, now - 1) },
+    { path: "Computer command list.md", state: noteState(2, now + day) },
     { path: "FlashCard Book/Deck/Cards.md", state: st(0, now) },
     { path: "Practice/Microeconomics.md", state: st(0, now) },
   ], now);
