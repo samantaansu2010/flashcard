@@ -86,6 +86,35 @@ await p.index.updateFile(vault.getAbstractFileByPath(templatePath));
 ok("Unrendered Templater expressions stay ignored even when a template folder is explicitly included", ![...p.index.cards.values()].some((card) => card.path === templatePath));
 settings.excludeTemplateFolders = true;
 
+// Explicitly scoped ordinary notes should also support the configured separator syntax.
+// This matches the user's workflow: an ordinary note with #flashcard and Question :: Answer lines.
+const taggedSeparatorPath = "03 Note/plans/flashcard.md";
+const taggedSeparatorText = `flashcards:true
+#flashcard
+
+- What is the chemical symbol for gold? :: Au
+
+- What planet is known as the Red Planet? :: Mars
+
+- What is the powerhouse of the cell? :: Mitochondria
+`;
+await vault.create(taggedSeparatorPath, taggedSeparatorText);
+cache.set(taggedSeparatorPath, { tags: ["#flashcard"] });
+settings.scopeMode = "tag";
+settings.scopeTag = "flashcard";
+await p.index.scanAll();
+const taggedSeparatorCards = [...p.index.cards.values()].filter((c) => c.path === taggedSeparatorPath);
+ok("Tag-scoped ordinary notes parse enabled Question :: Answer separators",
+  taggedSeparatorCards.length === 3 &&
+  taggedSeparatorCards.every((c) => c.rule === "separator" && c.back) &&
+  taggedSeparatorCards.every((c) => p.index.deckOf(c) === "03 Note/plans"),
+  JSON.stringify(taggedSeparatorCards.map((c) => [c.front, c.back, p.index.deckOf(c)])));
+
+// Restore broad scope for the remaining integration cases.
+settings.scopeMode = "all";
+settings.scopeTag = "";
+await p.index.scanAll();
+
 // create two separator cards + a cloze card
 const src = { file: "Econ/note.md", heading: "Micro", line: 2, text: "Opportunity cost: the value of the next best alternative that is given up" };
 let r = await p.cards.addCards([

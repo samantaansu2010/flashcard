@@ -6,7 +6,7 @@ export interface ExtractOptions {
   genericTables: boolean;
   clozeBold: boolean;
   maxTermWords: number;
-  /** Enabled separators for “front SEP back” lines. Only set for FlashCard Book folder files and manual generation. */
+  /** Enabled separators for “front SEP back” lines in indexed notes and explicit preview/manual generation. */
   separators?: string[];
   /** Ignore unresolved template expressions when indexing ordinary notes automatically. Deliberately false for manual extraction. */
   ignoreTemplateExpressions?: boolean;

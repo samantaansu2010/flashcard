@@ -26,7 +26,7 @@ The production build runs TypeScript's no-emit type check before bundling. CI ru
 ## When changing a subsystem
 
 - **Extraction:** test empty inputs, multiline answers, duplicate questions, fenced code, comments, math blocks, and template placeholders.
-- **Indexing:** test renamed or deleted notes, nested folders, exclusions, explicit frontmatter opt-in/out, and manual card files.
+- **Indexing:** test renamed or deleted notes, nested folders, exclusions, explicit frontmatter opt-in/out, manual card files, and separator cards in ordinary notes selected by tag or folder scope.
 - **Scheduling and dates:** test day boundaries, learning steps, review intervals, and more than one time zone.
 - **Import/export:** test malformed input, empty collections, large inputs where practical, and preservation of scheduling/history metadata.
 - **Storage:** verify identity across edits and moves, and ensure a failed operation does not silently discard existing data.

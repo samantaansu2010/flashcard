@@ -54,7 +54,7 @@ Right-click a file in the explorer for *Generate Flashcards*, *Review Cards from
 
 ## The FlashCard folder
 
-Cards you create live in real Markdown files under `FlashCard/` (configurable); sub-folders are decks (`FlashCard/Economics/Micro/Cards.md`). Type or paste lines like `What is GDP? :: Market value of final goods.` and they are cards. Built-in separators: `::` `→` `=>` `|` `=` `#` `@` `+` `$` (risky ones are off by default) plus your own, validated (punctuation/symbols only). Cards written by the plugin get a block id (`^fcb-…`) so review history survives edits and moves. Folders starting with `_` are ignored.
+Cards you create live in real Markdown files under `FlashCard/` (configurable); sub-folders are decks (`FlashCard/Economics/Micro/Cards.md`). Type or paste lines like `What is GDP? :: Market value of final goods.` and they are cards. With automatic generation enabled, the same configured separators also work in ordinary notes that match your selected scope (such as notes tagged `#flashcard`), and the source notes are not rewritten. Built-in separators: `::` `→` `=>` `|` `=` `#` `@` `+` `$` (risky ones are off by default) plus your own, validated (punctuation/symbols only). Cards written by the plugin get a block id (`^fcb-…`) so review history survives edits and moves. Folders starting with `_` are ignored.
 
 
 
@@ -96,7 +96,7 @@ For a note-by-note opt-in, add `flashcards: true` to its properties. Use `flashc
 * One note can trigger many rules. Explicit Q/A pairs, tables, bullets and colon lines claim their lines first, so fuzzier rules don't re-read them.
 * Identical questions inside a note are merged (highest-priority rule wins), so a heading *and* its definition sentence give one card, not two.
 * Code blocks, frontmatter, math blocks, `%%comments%%` and task lists are ignored. Labels like `Note:`, `TODO:`, `Example:` never become cards. Headings like *Summary*, *References*, *Chapter 3*, dates are skipped.
-* Automatic generation is off by default on new installs. `flashcards: true` explicitly opts a note in; `flashcards: false` opts it out. When automatic generation is enabled globally, settings can restrict generation to a tag or folders and exclude folders.
+* Automatic generation is off by default on new installs. `flashcards: true` explicitly opts a note in; `flashcards: false` opts it out. When automatic generation is enabled globally, settings can restrict generation to a tag or folders and exclude folders. Eligible ordinary notes can use the configured `Question :: Answer` (or another enabled separator) syntax as well as the other extraction rules.
 * When automatic generation is enabled, notes inside folders named `Template`, `Templates`, `_template`, or `_templates` are excluded by default, even when nested. Change **Ignore template folders** in Settings if you intentionally want to study those files. During automatic indexing of ordinary notes, unresolved Templater expressions (`<% … %>`) and common unresolved Core Templates placeholders (`{{date}}`, `{{time}}`, `{{title}}`) are ignored rather than becoming card answers. Manual card creation can still preserve literal template syntax.
 * Any card can be suspended from the preview window or the review screen.
 

@@ -41,9 +41,16 @@ export class CardIndex extends Events {
 
   isOfficial(path: string): boolean { return deckFromOfficialPath(path, this.plugin.settings.cardFolder) !== null; }
 
+  /** Internal folders under the card root (for example _exports and _media) are never source notes. */
+  private isIgnoredCardFolderPath(path: string): boolean {
+    const root = this.plugin.settings.cardFolder.split("\\").join("/").split("/").filter(Boolean).join("/");
+    if (!root || !path.startsWith(root + "/")) return false;
+    return path.slice(root.length + 1).split("/").some((segment) => segment.startsWith("_"));
+  }
+
   eligible(file: TFile): boolean {
     const s = this.plugin.settings;
-    if (file.extension !== "md") return false;
+    if (file.extension !== "md" || this.isIgnoredCardFolderPath(file.path)) return false;
     const cache = this.plugin.app.metadataCache.getFileCache(file);
     const fm: unknown = cache?.frontmatter?.flashcards;
     if (fm === false || fm === "false") return false;
@@ -163,7 +170,9 @@ export class CardIndex extends Events {
     if (!this.eligible(file)) { this.removePath(file.path, silent); return; }
     const text = await this.plugin.app.vault.cachedRead(file);
     const official = this.isOfficial(file.path);
-    const opts = { ...this.plugin.extractOptions(), separators: official ? this.plugin.enabledSeparators() : undefined, ignoreTemplateExpressions: !official };
+    // Only eligible files reach this point. Separator syntax is explicit, so honour the
+    // configured separators in tagged/folder-scoped ordinary notes as well as official card files.
+    const opts = { ...this.plugin.extractOptions(), separators: this.plugin.enabledSeparators(), ignoreTemplateExpressions: !official };
     this.set(file.path, extractCards(text, file.path, opts, this.plugin.enabledRules()), stamp);
     if (!silent) this.notify();
   }
