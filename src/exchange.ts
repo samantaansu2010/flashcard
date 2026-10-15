@@ -29,20 +29,227 @@ export interface ImportResult { cards: ImportedCard[]; warnings: string[]; skipp
 /* ─── HTML (Anki fields) → Markdown ─── */
 
 const ENT: Record<string, string> = { nbsp: " ", amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" };
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&#x([0-9a-f]+);/gi, (match, hex: string) => {
+      try { return String.fromCodePoint(parseInt(hex, 16)); } catch { return match; }
+    })
+    .replace(/&#(\d+);/g, (match, decimal: string) => {
+      try { return String.fromCodePoint(Number(decimal)); } catch { return match; }
+    })
+    .replace(/&([a-z]+);/gi, (match, name: string) => ENT[name.toLowerCase()] ?? match);
+}
+
+/** Escape text that could otherwise become a second round of raw HTML when Markdown is rendered. */
+function safeHtmlText(text: string): string {
+  return text.replace(/</g, "&lt;");
+}
+
+/** Anki media references are filenames, not arbitrary paths or URLs. */
+function safeMediaName(raw: string): string | null {
+  let name: string;
+  try { name = decodeURIComponent(raw).trim(); } catch { return null; }
+  if (!name || name === "." || name === ".." ||
+      /[\/\\\u0000-\u001f\u007f]/.test(name) ||
+      /^[a-z][a-z0-9+.-]*:/i.test(name)) return null;
+  return name;
+}
+
+function safeExternalImageUrl(raw: string): string | null {
+  try {
+    const url = new URL(raw.trim());
+    if ((url.protocol !== "http:" && url.protocol !== "https:") || url.username || url.password) return null;
+    return url.href.replace(/[()\s]/g, (character) => encodeURIComponent(character));
+  } catch {
+    return null;
+  }
+}
+
+function markdownImage(src: string | null, media?: string[]): string {
+  if (!src) return "";
+  const external = safeExternalImageUrl(src);
+  if (external) return "![](" + external + ")";
+  const name = safeMediaName(src);
+  if (!name) return "";
+  media?.push(name);
+  return "![[" + name + "]]";
+}
+
+function restoreSoundReferences(text: string, sounds: string[]): string {
+  let out = text;
+  sounds.forEach((link, index) => {
+    out = out.split("FLASHCARDSOUNDREF" + index + "END").join(link);
+  });
+  return safeHtmlText(out);
+}
+
+function renderHtmlNode(node: Node, media: string[] | undefined, sounds: string[]): string {
+  if (node.nodeType === 3) return restoreSoundReferences(node.nodeValue ?? "", sounds);
+  if (node.nodeType !== 1) return "";
+
+  const element = node as Element;
+  const tag = element.tagName.toLowerCase();
+  // Never import active or embedded content. DOMParser does not execute scripts, but their
+  // text must not be copied into Markdown either.
+  if (["script", "style", "iframe", "object", "embed", "svg", "math", "template", "noscript"].includes(tag)) return "";
+  if (tag === "img") return markdownImage(element.getAttribute("src"), media);
+  if (tag === "br") return "\n";
+
+  let children = "";
+  for (let i = 0; i < element.childNodes.length; i++) {
+    children += renderHtmlNode(element.childNodes[i], media, sounds);
+  }
+
+  switch (tag) {
+    case "b":
+    case "strong": return "**" + children + "**";
+    case "i":
+    case "em": return "*" + children + "*";
+    case "s":
+    case "strike":
+    case "del": return "~~" + children + "~~";
+    case "sup": return "^" + children;
+    case "sub": return "_" + children;
+    case "li": return "- " + children + "\n";
+    case "p":
+    case "div":
+    case "tr":
+    case "h1":
+    case "h2":
+    case "h3":
+    case "h4":
+    case "h5":
+    case "h6": return children + "\n";
+    default: return children;
+  }
+}
+
+/**
+ * Fallback for the Node-based pure-logic tests, which do not have a browser DOMParser.
+ * The Obsidian plugin uses DOMParser. This scanner respects quoted attributes, discards
+ * comments and active-content elements, and escapes decoded text instead of regex-stripping tags.
+ */
+function htmlToMarkdownWithoutDom(html: string, media: string[] | undefined, sounds: string[]): string {
+  const source = html;
+  let out = "";
+  let i = 0;
+  const lower = source.toLowerCase();
+  const unsafe = new Set(["script", "style", "iframe", "object", "embed", "svg", "math", "template", "noscript"]);
+
+  const appendText = (text: string): void => {
+    out += restoreSoundReferences(decodeHtmlEntities(text), sounds);
+  };
+  const findTagEnd = (from: number): number => {
+    let quote = "";
+    for (let p = from; p < source.length; p++) {
+      const ch = source[p];
+      if (quote) {
+        if (ch === quote) quote = "";
+      } else if (ch === '"' || ch === "'") {
+        quote = ch;
+      } else if (ch === ">") {
+        return p;
+      }
+    }
+    return -1;
+  };
+  const imageSrc = (raw: string): string | null => {
+    const match = /(?:^|\s)src\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(raw);
+    return match ? (match[1] ?? match[2] ?? match[3] ?? null) : null;
+  };
+
+  while (i < source.length) {
+    const open = source.indexOf("<", i);
+    if (open < 0) { appendText(source.slice(i)); break; }
+    if (open > i) appendText(source.slice(i, open));
+
+    if (source.slice(open, open + 4) === "<!--") {
+      const closeComment = source.indexOf("-->", open + 4);
+      i = closeComment < 0 ? source.length : closeComment + 3;
+      continue;
+    }
+
+    const close = findTagEnd(open + 1);
+    if (close < 0) {
+      appendText("<");
+      i = open + 1;
+      continue;
+    }
+    const raw = source.slice(open + 1, close);
+    const match = /^\s*(\/?)\s*([a-z][a-z0-9:-]*)\b/i.exec(raw);
+    if (!match) {
+      appendText("<");
+      i = open + 1;
+      continue;
+    }
+
+    const closing = match[1] === "/";
+    const tag = match[2].toLowerCase();
+    i = close + 1;
+
+    if (!closing && unsafe.has(tag)) {
+      const closeStart = lower.indexOf("</" + tag, i);
+      if (closeStart < 0) { i = source.length; continue; }
+      const closeEnd = findTagEnd(closeStart + 2 + tag.length);
+      i = closeEnd < 0 ? source.length : closeEnd + 1;
+      continue;
+    }
+
+    if (tag === "img" && !closing) {
+      out += markdownImage(imageSrc(raw), media);
+      continue;
+    }
+    if (tag === "br") { out += "\n"; continue; }
+    if (closing) {
+      if (["b", "strong"].includes(tag)) out += "**";
+      else if (["i", "em"].includes(tag)) out += "*";
+      else if (["s", "strike", "del"].includes(tag)) out += "~~";
+      else if (["p", "div", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6"].includes(tag)) out += "\n";
+      continue;
+    }
+
+    if (tag === "li") out += "- ";
+    else if (tag === "b" || tag === "strong") out += "**";
+    else if (tag === "i" || tag === "em") out += "*";
+    else if (tag === "s" || tag === "strike" || tag === "del") out += "~~";
+    else if (tag === "sup") out += "^";
+    else if (tag === "sub") out += "_";
+  }
+  return out;
+}
+
 export function htmlToMarkdown(html: string, media?: string[]): string {
-  let s = html;
-  s = s.replace(/\[sound:([^\]]+)\]/g, (_m, f: string) => { media?.push(f); return `![[${f}]]`; });
-  s = s.replace(/<img\b[^>]*?src\s*=\s*["']([^"']+)["'][^>]*>/gi, (_m, f: string) => { if (!/^https?:/i.test(f)) media?.push(decodeURIComponent(f)); return /^https?:/i.test(f) ? `![](${f})` : `![[${decodeURIComponent(f)}]]`; });
-  s = s.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(div|p|li|tr|h\d)>/gi, "\n").replace(/<li[^>]*>/gi, "- ");
-  s = s.replace(/<\/?(b|strong)>/gi, "**").replace(/<\/?(i|em)>/gi, "*").replace(/<\/?(s|strike|del)>/gi, "~~");
-  s = s.replace(/<sup>(.*?)<\/sup>/gi, "^$1").replace(/<sub>(.*?)<\/sub>/gi, "_$1");
-  s = s.replace(/<[^>]+>/g, "");
-  s = s.replace(/&#x([0-9a-f]+);/gi, (_m, h: string) => String.fromCodePoint(parseInt(h, 16)))
-    .replace(/&#(\d+);/g, (_m, d: string) => String.fromCodePoint(+d))
-    .replace(/&([a-z]+);/gi, (m, n: string) => ENT[n.toLowerCase()] ?? m);
-  s = s.replace(/\[\$\$\]([\s\S]*?)\[\/\$\$\]/g, "$$$$$1$$$$").replace(/\[\$\]([\s\S]*?)\[\/\$\]/g, "$$$1$$")
-    .replace(/\\\(([\s\S]*?)\\\)/g, "$$$1$$").replace(/\\\[([\s\S]*?)\\\]/g, "$$$$$1$$$$");
-  return s.replace(/\u00a0/g, " ").replace(/\*\*\s*\*\*/g, "").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  const sounds: string[] = [];
+  const source = html.replace(/\[sound:([^\]]+)\]/gi, (_match, rawName: string) => {
+    const name = safeMediaName(rawName);
+    if (!name) return "";
+    media?.push(name);
+    const index = sounds.length;
+    sounds.push("![[" + name + "]]");
+    return "FLASHCARDSOUNDREF" + index + "END";
+  });
+
+  let converted: string;
+  if (typeof DOMParser !== "undefined") {
+    const doc = new DOMParser().parseFromString(source, "text/html");
+    converted = "";
+    for (let i = 0; i < doc.body.childNodes.length; i++) {
+      converted += renderHtmlNode(doc.body.childNodes[i], media, sounds);
+    }
+  } else {
+    converted = htmlToMarkdownWithoutDom(source, media, sounds);
+  }
+
+  return converted
+    .replace(/\[\$\$\]([\s\S]*?)\[\/\$\$\]/g, "$$$$ $1 $$$$".replace(/ /g, ""))
+    .replace(/\[\$\]([\s\S]*?)\[\/\$\]/g, "$$$1$$")
+    .replace(/\\\(([\s\S]*?)\\\)/g, "$$$1$$")
+    .replace(/\\\[([\s\S]*?)\\\]/g, "$$$$ $1 $$$$".replace(/ /g, ""))
+    .replace(/\u00a0/g, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 export const looksLikeHtml = (s: string): boolean => /<\/?[a-z][^>]*>|&[a-z#0-9]+;/i.test(s);
 
