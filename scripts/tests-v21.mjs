@@ -32,6 +32,12 @@ export async function run({ load, ok }) {
   /* ── keyboard rules ── */
   const m = keys.keyMatches;
   ok("keyMatches: lists, Space alias, case-insensitive", m({ key: " " }, "Space,Enter") && m({ key: "Enter" }, "Space,Enter") && m({ key: "S" }, "s") && !m({ key: "x" }, "s") && !m({ key: "a" }, "") && m({ key: "Escape" }, "Escape"));
+  const answerKey = keys.answerBoxKeyAction;
+  ok("Answer box: Ctrl+Enter reveals the answer", answerKey({ key: "Enter", ctrlKey: true }) === "reveal");
+  ok("Answer box: Cmd+Enter reveals the answer", answerKey({ key: "Enter", metaKey: true }) === "reveal");
+  ok("Answer box: plain Enter is blocked", answerKey({ key: "Enter" }) === "block");
+  ok("Answer box: Shift+Enter remains available for multiline input", answerKey({ key: "Enter", shiftKey: true }) === "ignore");
+  ok("Answer box: unrelated keys remain normal typing", answerKey({ key: "a" }) === "ignore");
   const T = (tagName, extra = {}) => ({ tagName, ...extra });
   ok("Shortcuts never fire in text fields (typed-answer input)", ["INPUT", "TEXTAREA", "SELECT"].every((t) => !keys.shouldHandleShortcut("1", T(t), false) && !keys.shouldHandleShortcut(" ", T(t), false) && !keys.shouldHandleShortcut("s", T(t), false)));
   ok("Shortcuts never fire in contenteditable", !keys.shouldHandleShortcut("1", T("DIV", { isContentEditable: true }), false));

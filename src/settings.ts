@@ -6,12 +6,12 @@ import { BUILTIN_SEPARATORS, DEFAULT_SEPARATOR, SeparatorDef, normalizeSeparator
 import { normalizePath } from "obsidian";
 import { PromptModal, setDestructiveStyle } from "./ui/common";
 
-export type KeyAction = "showAnswer" | "again" | "hard" | "good" | "easy" | "skip" | "edit" | "undo" | "openSource" | "suspend" | "exit";
+export type KeyAction = "showAnswer" | "again" | "hard" | "good" | "easy" | "skip" | "edit" | "undo" | "suspend" | "exit";
 export const KEY_LABELS: Record<KeyAction, string> = {
-  showAnswer: "Show answer", again: "Again", hard: "Hard", good: "Good", easy: "Easy", skip: "Skip", edit: "Edit card", undo: "Undo", openSource: "Open source", suspend: "Suspend card", exit: "Exit review",
+  showAnswer: "Show answer", again: "Again", hard: "Hard", good: "Good", easy: "Easy", skip: "Skip", edit: "Edit card", undo: "Undo", suspend: "Suspend card", exit: "Exit review",
 };
 export const DEFAULT_KEYS: Record<KeyAction, string> = {
-  showAnswer: "Space,Enter", again: "1", hard: "2", good: "3", easy: "4", skip: "s", edit: "e", undo: "z", openSource: "o", suspend: "", exit: "Escape",
+  showAnswer: "Space,Enter", again: "1", hard: "2", good: "3", easy: "4", skip: "s", edit: "e", undo: "z", suspend: "", exit: "Escape",
 };
 export { keyMatches } from "./keys";
 

@@ -70,7 +70,7 @@ export const GUIDE: GuideSection[] = [
   {
     "id": "reviewing",
     "title": "Reviewing",
-    "body": "Flow: question → (optional typed answer) → **Show answer** → answer → **Again / Hard / Good / Easy**.\n\n| Key | Action |\n|---|---|\n| Space / Enter | Show answer |\n| 1 2 3 4 | Again, Hard, Good, Easy |\n| S | Skip |\n| E | Edit card |\n| O | Open source |\n| Z | Undo |\n| Esc | Exit |\n\nAll keys can be changed in Settings → Keyboard shortcuts.\n\n**Review modes:** Due, New, Learning, Weak, Missed, Current note, Current section, Deck, Tag, Random, Cram – each with an optional card limit (command **Start a custom review…**).\n\n- *Weak*: ≥3 lapses or ≥30% Again in the last 10 answers.\n- *Missed*: answered Again in the last 7 days.\n- *Cram*: every card regardless of due date; **does not change scheduling** and is excluded from retention.\n\n**Skip** means “I did not review this card”. It is never a failure. Settings decide whether a skipped card returns later in the session, is hidden until tomorrow, or counts as Again."
+    "body": "Flow: question → (optional typed answer) → **Show answer** → answer → **Again / Hard / Good / Easy**.\n\n| Key | Action |\n|---|---|\n| Space / Enter | Show answer |\n| 1 2 3 4 | Again, Hard, Good, Easy |\n| S | Skip |\n| E | Edit card |\n| Z | Undo |\n| Esc | Exit |\n\nWhen the answer box is focused, **Enter alone does nothing**: it neither reveals the answer nor inserts a line break. Use **Ctrl/Cmd+Enter** to reveal and **Shift+Enter** for a line break.\n\nAll keys can be changed in Settings → Keyboard shortcuts.\n\n**Review modes:** Due, New, Learning, Weak, Missed, Current note, Current section, Deck, Tag, Random, Cram – each with an optional card limit (command **Start a custom review…**).\n\n- *Weak*: ≥3 lapses or ≥30% Again in the last 10 answers.\n- *Missed*: answered Again in the last 7 days.\n- *Cram*: every card regardless of due date; **does not change scheduling** and is excluded from retention.\n\n**Skip** means “I did not review this card”. It is never a failure. Settings decide whether a skipped card returns later in the session, is hidden until tomorrow, or counts as Again."
   },
   {
     "id": "skip",
@@ -110,7 +110,7 @@ export const GUIDE: GuideSection[] = [
   {
     "id": "source",
     "title": "Source Tracking",
-    "body": "Every card remembers where it came from: source note, heading, block (if the line had one), the original selected text, the rule that created it, when it was created, and how (automatic, selection, section, note, manual, imported, converted).\n\nThis survives editing and moving between decks. **Open source** (card menu or **O** while reviewing) jumps to the block, heading or line."
+    "body": "Every card remembers where it came from: source note, heading, block (if the line had one), the original selected text, the rule that created it, when it was created, and how (automatic, selection, section, note, manual, imported, converted).\n\nThis survives editing and moving between decks. **Open source** (three-dot card menu only) jumps to the block, heading or line."
   },
   {
     "id": "management",
@@ -120,7 +120,7 @@ export const GUIDE: GuideSection[] = [
   {
     "id": "tracking",
     "title": "Stable Source Tracking",
-    "body": "Every card remembers where it came from. This does not depend on the card's text:\n\n- **Source note**, **heading**, and **block** (when the source line has a block id)\n- the **original source text** and the **line number**\n- the **rule** that created it, **when**, and **how** (automatic, selection, section, note, manual, imported, converted)\n\n**Open source** (card menu, or **O** while reviewing) finds the place again even after the note changed. It tries, in order: the block id → the stored source text → the heading → the old line number.\n\n- *Renamed or moved notes:* renames made in Obsidian update all cards automatically. If a note is moved outside Obsidian, FlashCard Book finds it again when the file name is unique.\n- *Deleted source note:* you get a clear message; the card itself keeps working.\n- *Edited source text:* the heading or the old line is used as a fallback.\n\nSource information survives editing a card and moving it between decks. Your notes are never modified."
+    "body": "Every card remembers where it came from. This does not depend on the card's text:\n\n- **Source note**, **heading**, and **block** (when the source line has a block id)\n- the **original source text** and the **line number**\n- the **rule** that created it, **when**, and **how** (automatic, selection, section, note, manual, imported, converted)\n\n**Open source** (three-dot card menu only) finds the place again even after the note changed. It tries, in order: the block id → the stored source text → the heading → the old line number.\n\n- *Renamed or moved notes:* renames made in Obsidian update all cards automatically. If a note is moved outside Obsidian, FlashCard Book finds it again when the file name is unique.\n- *Deleted source note:* you get a clear message; the card itself keeps working.\n- *Edited source text:* the heading or the old line is used as a fallback.\n\nSource information survives editing a card and moving it between decks. Your notes are never modified."
   },
   {
     "id": "automatic",

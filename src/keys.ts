@@ -8,6 +8,27 @@ export function keyMatches(e: { key: string }, spec: string): boolean {
   });
 }
 
+/** What the review answer box should do with a keypress. */
+export type AnswerBoxKeyAction = "reveal" | "block" | "ignore";
+
+export interface AnswerBoxKeyEvent {
+  key: string;
+  ctrlKey?: boolean;
+  metaKey?: boolean;
+  shiftKey?: boolean;
+  altKey?: boolean;
+}
+
+/**
+ * Classify keys while the optional-answer textarea is focused.
+ * Plain Enter is blocked; Ctrl/Cmd+Enter reveals; Shift+Enter remains a line break.
+ */
+export function answerBoxKeyAction(e: AnswerBoxKeyEvent): AnswerBoxKeyAction {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") return "reveal";
+  if (e.key === "Enter" && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) return "block";
+  return "ignore";
+}
+
 export interface KeyTarget { tagName?: string; isContentEditable?: boolean }
 
 const TEXT_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"]);
