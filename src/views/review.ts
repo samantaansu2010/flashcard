@@ -2,7 +2,7 @@ import { ItemView, MarkdownRenderer, Notice, WorkspaceLeaf, setIcon } from "obsi
 import type FlashCardBook from "../main";
 import { Card, Grade, ReviewOptions, ReviewScope } from "../types";
 import { KeyAction } from "../settings";
-import { keyMatches, shouldHandleShortcut } from "../keys";
+import { answerBoxKeyAction, keyMatches, shouldHandleShortcut } from "../keys";
 import { ReviewOptionsModal } from "../ui/review-options";
 import { VERDICT_GRADE, VERDICT_LABEL, Verdict } from "../compare";
 import { openCardMenu } from "../ui/card-menu";
@@ -114,15 +114,14 @@ export class ReviewView extends ItemView {
     this.plugin.refreshUi();
   }
 
-  private async openNote(): Promise<void> { if (this.card) await this.plugin.cards.openSource(this.card); }
-
   private onKey(e: KeyboardEvent): void {
     const k = this.plugin.settings.keys;
     const target = e.target instanceof HTMLElement ? e.target : null;
     const typing = target instanceof HTMLTextAreaElement;
     if (typing) {
-      // inside the answer box only these two keys do anything; everything else is just typing
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); this.reveal(); }
+      const action = answerBoxKeyAction(e);
+      if (action === "reveal") { e.preventDefault(); this.reveal(); }
+      else if (action === "block") e.preventDefault();
       else if (e.key === "Escape") { e.preventDefault(); this.contentEl.focus(); } // leave the box first; a second Esc exits
       return;
     }
@@ -136,7 +135,6 @@ export class ReviewView extends ItemView {
     if (is("undo")) { stop(); this.undo(); return; }
     if (is("skip")) { stop(); this.skip(); return; }
     if (is("edit")) { stop(); this.edit(); return; }
-    if (is("openSource")) { stop(); void this.openNote(); return; }
     if (is("suspend")) { stop(); this.suspend(); return; }
     if (!this.revealed) { if (is("showAnswer")) { stop(); this.reveal(); } return; }
     const grades: Grade[] = [0, 1, 2, 3];
@@ -195,7 +193,6 @@ export class ReviewView extends ItemView {
     const tools = head.createDiv({ cls: "fcb-tools", attr: { role: "toolbar", "aria-label": "Card tools" } });
     this.iconButton(tools, "undo-2", `Undo last answer (${this.firstKey("undo")})`, () => this.undo());
     this.iconButton(tools, "pencil", `Edit card (${this.firstKey("edit")})`, () => this.edit());
-    this.iconButton(tools, "file-text", `Open source (${this.firstKey("openSource")})`, () => void this.openNote());
     const more = this.iconButton(tools, "more-horizontal", "Card actions: edit, open source, regenerate, move, tag, suspend, reset, delete", () => undefined);
     more.onclick = (ev) => openCardMenu(this.plugin, card, ev, () => { this.card = this.plugin.index.cards.get(card.id) ?? null; if (this.card) this.renderCard(); else this.next(); });
 

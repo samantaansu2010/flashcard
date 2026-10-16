@@ -14,7 +14,7 @@ You write normal Markdown. When you enable automatic generation, FlashCard can r
 
 
 * Typed-answer comparison shows just a verdict badge and the correct/partial/incorrect override by default; the word-match %, meter and matched/missed terms are one click away behind "Show details"
-* The review card's metadata line is now just the deck name; source note, heading and extraction rule are a tooltip away and still reachable via Open Source / the card menu
+* The review card's metadata line shows the deck name, not the source filename. Source details remain in its tooltip; opening the source note is available from the three-dot card menu.
 * Session-complete screen leads with Correct % and Study time; the card/skip count moved to a small caption since the Again/Hard/Good/Easy bar already shows it
 * A short orienting note at the top of Settings, plus the search box, points new users at the handful of settings that matter
 
@@ -35,7 +35,7 @@ You write normal Markdown. When you enable automatic generation, FlashCard can r
 * Internal card ids (`^fcb-…`) are hidden in Reading mode and Live Preview (still in the file, so identity and history are unchanged)
 * Dashboard ranges use local calendar days and never extend past today; deck performance is a hierarchy; clearer visual hierarchy
 * Roomier, responsive import/export and other dialogs; settings grouped into collapsible sections
-* Review screen and session summary polish; Skip is visibly different from Again; shortcuts never fire while typing
+* Review screen and session summary polish; Skip is visibly different from Again; answer-box keys are handled separately, with Ctrl/Cmd+Enter reserved for revealing
 * Side-by-side duplicate comparison; Open Source survives renamed, moved, edited and deleted notes
 
 ## Two ways to get cards
@@ -104,7 +104,7 @@ For a note-by-note opt-in, add `flashcards: true` to its properties. Use `flashc
 
 * **Active recall:** type what you remember (optional), reveal, and the plugin compares your answer with the expected one: stop-words ignored, light stemming, typo tolerance, numbers and longer terms weigh more. You see recalled vs. missed key terms, a match %, and a suggested grade.
 * **Grades:** Again / Hard / Good / Easy with the resulting interval on each button.
-* **Keys:** `Space`/`Enter` reveal & grade (Good, or the suggested grade after a typed answer), `1–4` grade, `Z` undo, `O` open the source note, `Ctrl/Cmd+Enter` reveal from the answer box.
+* **Keys:** `Space`/`Enter` reveal & grade when the review surface has focus; `1–4` grade, `Z` undo. In the answer box, plain `Enter` neither reveals nor inserts a newline; use `Ctrl/Cmd+Enter` to reveal or `Shift+Enter` for a newline. Open the source note from the three-dot card menu.
 * Review everything due, the **current note**, the **current folder**, or a **tag**.
 
 ## Scheduler
